@@ -9,7 +9,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
     WM_LBUTTONDOWN, WM_LBUTTONUP,
 };
 
-use crate::domain::selection::MouseEvent;
+use domain::selection::MouseEvent;
 
 static SENDER: OnceLock<Sender<MouseEvent>> = OnceLock::new();
 

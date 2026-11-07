@@ -1,5 +1,5 @@
 use super::should_copy;
-use crate::domain::exclusions::ExcludedPrograms;
+use crate::exclusions::ExcludedPrograms;
 
 fn excluding(name: &str) -> ExcludedPrograms {
     let mut excluded = ExcludedPrograms::default();

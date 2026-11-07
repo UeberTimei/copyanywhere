@@ -1,0 +1,10 @@
+[package]
+name = "ui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+application = { path = "../application" }
+domain = { path = "../domain" }
+gpui = "0.2.2"
+tray-icon = "0.26"

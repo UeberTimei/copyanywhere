@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use super::{load_from, save_to};
-use crate::domain::settings::Settings;
+use domain::settings::Settings;
 
 fn scratch_dir(name: &str) -> PathBuf {
     std::env::temp_dir().join(format!("copyanywhere-{}-{name}", std::process::id()))

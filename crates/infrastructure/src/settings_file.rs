@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::domain::settings::Settings;
+use domain::settings::Settings;
 
 pub fn load() -> Settings {
     load_from(&file_path())

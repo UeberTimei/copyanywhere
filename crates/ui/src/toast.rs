@@ -1,6 +1,4 @@
 mod fade;
-mod geometry;
-mod place;
 #[cfg(test)]
 mod tests;
 mod view;
@@ -10,12 +8,15 @@ use gpui::{
     point, px, size,
 };
 
-use geometry::TOAST_SIZE;
+use crate::native_window::{Spot, show_at};
+use crate::placement::above_right;
 use view::ToastView;
+
+const TOAST_SIZE: (f32, f32) = (96.0, 32.0);
 
 pub fn show(cx: &mut App, at: (i32, i32)) {
     // GPUI falls back to a huge window when bounds miss the primary monitor, so
-    // it opens on the primary one hidden and place::show_near moves it for real
+    // it opens on the primary one hidden and show_at moves it for real
     let bounds = Bounds::new(
         point(px(0.), px(0.)),
         size(px(TOAST_SIZE.0), px(TOAST_SIZE.1)),
@@ -35,7 +36,15 @@ pub fn show(cx: &mut App, at: (i32, i32)) {
         return;
     };
     handle
-        .update(cx, |_, window, _| place::show_near(window, at))
+        .update(cx, |_, window, _| {
+            let spot = Spot {
+                at,
+                logical_size: TOAST_SIZE,
+                origin: above_right,
+                activate: false,
+            };
+            show_at(window, &spot)
+        })
         .ok();
     cx.spawn(async move |cx| {
         cx.background_executor().timer(fade::LIFETIME).await;

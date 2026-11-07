@@ -6,28 +6,42 @@ use windows::Win32::Graphics::Gdi::{
 };
 use windows::Win32::UI::HiDpi::GetDpiForWindow;
 use windows::Win32::UI::WindowsAndMessaging::{
-    HWND_TOPMOST, SWP_NOACTIVATE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW, SetWindowPos,
+    HWND_TOPMOST, SET_WINDOW_POS_FLAGS, SWP_NOACTIVATE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW,
+    SetWindowPos,
 };
 
-use super::geometry::{Area, pixel_size, popup_origin};
+use crate::placement::{Area, Origin, pixel_size};
 
-pub fn show_near(window: &Window, at: (i32, i32)) {
+pub struct Spot {
+    pub at: (i32, i32),
+    pub logical_size: (f32, f32),
+    pub origin: Origin,
+    pub activate: bool,
+}
+
+// GPUI opens windows on the primary monitor, so the real position is set natively
+pub fn show_at(window: &Window, spot: &Spot) {
     let Some(hwnd) = native_handle(window) else {
         return;
     };
-    let screen = monitor_area(at);
+    let screen = monitor_area(spot.at);
+    let keep_focus = if spot.activate {
+        SET_WINDOW_POS_FLAGS(0)
+    } else {
+        SWP_NOACTIVATE
+    };
     unsafe {
         let _ = SetWindowPos(
             hwnd,
             None,
-            at.0,
-            at.1,
+            spot.at.0,
+            spot.at.1,
             0,
             0,
             SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE,
         );
-        let size = pixel_size(GetDpiForWindow(hwnd));
-        let (x, y) = popup_origin(at, size, screen);
+        let size = pixel_size(spot.logical_size, GetDpiForWindow(hwnd));
+        let (x, y) = (spot.origin)(spot.at, size, screen);
         let _ = SetWindowPos(
             hwnd,
             Some(HWND_TOPMOST),
@@ -35,7 +49,7 @@ pub fn show_near(window: &Window, at: (i32, i32)) {
             y,
             size.0,
             size.1,
-            SWP_NOACTIVATE | SWP_SHOWWINDOW,
+            keep_focus | SWP_SHOWWINDOW,
         );
     }
 }

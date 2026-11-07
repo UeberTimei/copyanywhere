@@ -3,10 +3,11 @@ use std::sync::Arc;
 
 use domain::settings::Settings;
 use gpui::{
-    AnyWindowHandle, App, Context, TitlebarOptions, WindowBounds, WindowOptions, prelude::*, px,
-    size,
+    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, point, prelude::*, px, size,
 };
 
+use crate::native_window::{Spot, show_at};
+use crate::placement::corner_at;
 use crate::settings_logic::{self, Feature};
 use crate::theme;
 
@@ -25,19 +26,32 @@ pub struct SettingsView {
     running_programs: Arc<dyn Fn() -> Vec<String>>,
 }
 
-pub fn open(cx: &mut App, actions: SettingsActions) -> Option<AnyWindowHandle> {
-    let window_size = size(px(theme::WINDOW_WIDTH), px(theme::WINDOW_HEIGHT));
+pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<AnyWindowHandle> {
+    let logical_size = (theme::WINDOW_WIDTH, theme::WINDOW_HEIGHT);
+    let bounds = Bounds::new(
+        point(px(0.), px(0.)),
+        size(px(logical_size.0), px(logical_size.1)),
+    );
     let options = WindowOptions {
-        window_bounds: Some(WindowBounds::centered(window_size, cx)),
-        titlebar: Some(TitlebarOptions {
-            title: Some("CopyAnywhere settings".into()),
-            ..Default::default()
-        }),
+        window_bounds: Some(WindowBounds::Windowed(bounds)),
+        titlebar: None,
         is_resizable: false,
+        show: false,
         ..Default::default()
     };
-    let handle = cx.open_window(options, |_, cx| cx.new(|_| SettingsView::new(actions)));
-    handle.ok().map(Into::into)
+    let handle = cx
+        .open_window(options, |_, cx| cx.new(|_| SettingsView::new(actions)))
+        .ok()?;
+    let spot = Spot {
+        at,
+        logical_size,
+        origin: corner_at,
+        activate: true,
+    };
+    handle
+        .update(cx, |_, window, _| show_at(window, &spot))
+        .ok()?;
+    Some(handle.into())
 }
 
 impl SettingsView {

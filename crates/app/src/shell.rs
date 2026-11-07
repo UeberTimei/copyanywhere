@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use application::session::Session;
 use gpui::{AnyWindowHandle, App, Application};
+use infrastructure::mouse_hook;
 use ui::tray::{Tray, TrayCommand};
 use ui::{anchor, settings_window, toast};
 
@@ -57,6 +58,9 @@ fn open_settings(session: &Arc<Session>, window: &mut Option<AnyWindowHandle>, c
                 .update(cx, |_, window, _| window.activate_window())
                 .ok();
         }
-        None => *window = settings_window::open(cx, settings_actions(session)),
+        None => {
+            *window =
+                settings_window::open(cx, settings_actions(session), mouse_hook::cursor_position())
+        }
     }
 }

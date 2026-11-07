@@ -1,13 +1,11 @@
 use std::rc::Rc;
 
-use gpui::{
-    App, ClickEvent, Context, FontWeight, IntoElement, Render, Window, div, prelude::*, px, rgb,
-    rgba,
-};
+use gpui::{App, ClickEvent, Context, IntoElement, Render, Window, div, prelude::*, px, rgb, rgba};
 
 use crate::card::{card, section};
 use crate::exclusion_list::{Callback, exclusion_card};
 use crate::program_picker::program_picker;
+use crate::settings_header::header;
 use crate::settings_logic::{self, Feature};
 use crate::settings_window::SettingsView;
 use crate::theme;
@@ -40,6 +38,8 @@ impl Render for SettingsView {
             .bg(rgb(theme::WINDOW_BG))
             .text_color(rgb(theme::TEXT))
             .font_family(theme::FONT_FAMILY)
+            .border_1()
+            .border_color(rgba(theme::HAIRLINE))
             .overflow_y_scroll()
             .child(header(self.enabled))
             .child(section(
@@ -81,26 +81,6 @@ impl Render for SettingsView {
                     .children(picker),
             ))
     }
-}
-
-fn header(enabled: bool) -> impl IntoElement {
-    let (status, dot) = if enabled {
-        ("Auto-copy is on", theme::ACCENT)
-    } else {
-        ("Auto-copy is off", theme::TEXT_MUTED)
-    };
-    div()
-        .flex()
-        .items_center()
-        .gap(px(8.))
-        .child(div().size(px(theme::DOT_SIZE)).rounded_full().bg(rgb(dot)))
-        .child(
-            div()
-                .text_size(px(20.))
-                .line_height(px(24.))
-                .font_weight(FontWeight::MEDIUM)
-                .child(status),
-        )
 }
 
 fn toggle_row(

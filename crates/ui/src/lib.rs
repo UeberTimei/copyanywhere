@@ -1,7 +1,10 @@
 pub mod anchor;
 pub mod card;
 pub mod exclusion_list;
+pub mod native_window;
+pub mod placement;
 pub mod program_picker;
+pub mod settings_header;
 pub mod settings_logic;
 pub mod settings_render;
 pub mod settings_window;

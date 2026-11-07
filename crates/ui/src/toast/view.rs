@@ -1,16 +1,35 @@
+use std::time::Instant;
+
 use gpui::{Context, IntoElement, Render, Window, div, prelude::*, px, rgb, rgba};
+
+use super::fade;
 
 const RAISED: u32 = 0x232325;
 const HAIRLINE: u32 = 0xededed14;
 const TEXT: u32 = 0xededed;
 const ACCENT: u32 = 0x46c2a1;
 
-pub struct ToastView;
+pub struct ToastView {
+    born: Instant,
+}
+
+impl ToastView {
+    pub fn new() -> Self {
+        Self {
+            born: Instant::now(),
+        }
+    }
+}
 
 impl Render for ToastView {
-    fn render(&mut self, _: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, _: &mut Context<Self>) -> impl IntoElement {
+        let elapsed = self.born.elapsed();
+        if elapsed < fade::LIFETIME {
+            window.request_animation_frame();
+        }
         div()
             .size_full()
+            .opacity(fade::opacity(elapsed))
             .flex()
             .items_center()
             .gap(px(8.))

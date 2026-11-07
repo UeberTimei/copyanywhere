@@ -1,17 +1,17 @@
+mod fade;
 mod geometry;
 mod place;
 #[cfg(test)]
 mod tests;
 mod view;
 
-use std::time::Duration;
-
-use gpui::{App, AppContext, Bounds, WindowBounds, WindowKind, WindowOptions, point, px, size};
+use gpui::{
+    App, AppContext, Bounds, WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions,
+    point, px, size,
+};
 
 use geometry::TOAST_SIZE;
 use view::ToastView;
-
-const VISIBLE_FOR: Duration = Duration::from_millis(1200);
 
 pub fn show(cx: &mut App, at: (i32, i32)) {
     // GPUI falls back to a huge window when bounds miss the primary monitor, so
@@ -24,21 +24,21 @@ pub fn show(cx: &mut App, at: (i32, i32)) {
         window_bounds: Some(WindowBounds::Windowed(bounds)),
         focus: false,
         show: false,
+        window_background: WindowBackgroundAppearance::Transparent,
         kind: WindowKind::PopUp,
         is_movable: false,
         is_resizable: false,
         is_minimizable: false,
         ..Default::default()
     };
-    let opened = cx.open_window(options, |window, cx| {
-        place::show_near(window, at);
-        cx.new(|_| ToastView)
-    });
-    let Ok(handle) = opened else {
+    let Ok(handle) = cx.open_window(options, |_, cx| cx.new(|_| ToastView::new())) else {
         return;
     };
+    handle
+        .update(cx, |_, window, _| place::show_near(window, at))
+        .ok();
     cx.spawn(async move |cx| {
-        cx.background_executor().timer(VISIBLE_FOR).await;
+        cx.background_executor().timer(fade::LIFETIME).await;
         handle
             .update(cx, |_, window, _| window.remove_window())
             .ok();

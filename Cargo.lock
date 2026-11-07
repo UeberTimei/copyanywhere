@@ -1058,6 +1058,7 @@ dependencies = [
  "anyhow",
  "application",
  "domain",
+ "gpui",
  "infrastructure",
  "ui",
 ]

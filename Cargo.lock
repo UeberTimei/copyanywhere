@@ -6253,6 +6253,7 @@ dependencies = [
  "application",
  "domain",
  "gpui",
+ "thiserror 2.0.21",
  "tray-icon",
 ]
 

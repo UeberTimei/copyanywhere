@@ -8,3 +8,4 @@ application = { path = "../application" }
 domain = { path = "../domain" }
 gpui = "0.2.2"
 tray-icon = "0.26"
+thiserror = "2"

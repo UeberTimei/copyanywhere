@@ -36,7 +36,7 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
         window_bounds: Some(WindowBounds::Windowed(bounds)),
         titlebar: None,
         is_resizable: false,
-        show: false,
+        show: true,
         ..Default::default()
     };
     let handle = cx

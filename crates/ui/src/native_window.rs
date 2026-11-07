@@ -6,8 +6,8 @@ use windows::Win32::Graphics::Gdi::{
 };
 use windows::Win32::UI::HiDpi::GetDpiForWindow;
 use windows::Win32::UI::WindowsAndMessaging::{
-    HWND_TOPMOST, SET_WINDOW_POS_FLAGS, SWP_NOACTIVATE, SWP_NOSIZE, SWP_NOZORDER, SWP_SHOWWINDOW,
-    SetWindowPos,
+    GWL_STYLE, HWND_TOPMOST, SET_WINDOW_POS_FLAGS, SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOSIZE,
+    SWP_NOZORDER, SWP_SHOWWINDOW, SetWindowLongPtrW, SetWindowPos, WS_POPUP,
 };
 
 use crate::placement::{Area, Origin, pixel_size};
@@ -19,8 +19,9 @@ pub struct Spot {
     pub activate: bool,
 }
 
-// GPUI opens windows on the primary monitor, so the real position is set natively.
-// Must run outside an app update: showing the window makes GPUI paint synchronously
+// GPUI creates popups with an overlapped style whose minimum height includes a caption, so
+// the window is turned into a plain popup and given its exact size and place natively.
+// Must run outside an app update: resizing makes GPUI paint synchronously
 pub fn show_at(hwnd: HWND, spot: &Spot) {
     let screen = monitor_area(spot.at);
     let keep_focus = if spot.activate {
@@ -29,6 +30,7 @@ pub fn show_at(hwnd: HWND, spot: &Spot) {
         SWP_NOACTIVATE
     };
     unsafe {
+        SetWindowLongPtrW(hwnd, GWL_STYLE, WS_POPUP.0 as isize);
         let _ = SetWindowPos(
             hwnd,
             None,
@@ -36,7 +38,7 @@ pub fn show_at(hwnd: HWND, spot: &Spot) {
             spot.at.1,
             0,
             0,
-            SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE,
+            SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED,
         );
         let size = pixel_size(spot.logical_size, GetDpiForWindow(hwnd));
         let (x, y) = (spot.origin)(spot.at, size, screen);

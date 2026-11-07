@@ -2,7 +2,10 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use domain::settings::Settings;
-use gpui::{App, Context, TitlebarOptions, WindowBounds, WindowOptions, prelude::*, px, size};
+use gpui::{
+    AnyWindowHandle, App, Context, TitlebarOptions, WindowBounds, WindowOptions, prelude::*, px,
+    size,
+};
 
 use crate::settings_logic::{self, Feature};
 use crate::theme;
@@ -22,7 +25,7 @@ pub struct SettingsView {
     running_programs: Arc<dyn Fn() -> Vec<String>>,
 }
 
-pub fn open(cx: &mut App, actions: SettingsActions) {
+pub fn open(cx: &mut App, actions: SettingsActions) -> Option<AnyWindowHandle> {
     let window_size = size(px(theme::WINDOW_WIDTH), px(theme::WINDOW_HEIGHT));
     let options = WindowOptions {
         window_bounds: Some(WindowBounds::centered(window_size, cx)),
@@ -33,7 +36,8 @@ pub fn open(cx: &mut App, actions: SettingsActions) {
         is_resizable: false,
         ..Default::default()
     };
-    let _ = cx.open_window(options, |_, cx| cx.new(|_| SettingsView::new(actions)));
+    let handle = cx.open_window(options, |_, cx| cx.new(|_| SettingsView::new(actions)));
+    handle.ok().map(Into::into)
 }
 
 impl SettingsView {

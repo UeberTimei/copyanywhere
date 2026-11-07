@@ -1,5 +1,10 @@
+pub mod card;
 pub mod exclusion_list;
+pub mod program_picker;
+pub mod settings_logic;
+pub mod settings_render;
 pub mod settings_window;
+pub mod theme;
 pub mod toast;
 pub mod toggle;
 pub mod tray;

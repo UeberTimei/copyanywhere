@@ -9,7 +9,7 @@ use ui::{anchor, settings_window, toast};
 
 use crate::actions::settings_actions;
 
-const TICK: Duration = Duration::from_millis(50);
+const TICK: Duration = Duration::from_millis(16);
 
 pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
     Application::new().run(move |cx: &mut App| {

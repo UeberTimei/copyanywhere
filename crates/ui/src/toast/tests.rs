@@ -1,17 +1,41 @@
-use super::geometry::{dpi_scale, popup_origin};
+use super::geometry::{Area, pixel_size, popup_origin};
+
+const SCREEN: Area = Area {
+    left: 0,
+    top: 0,
+    right: 1920,
+    bottom: 1080,
+};
+const SIZE: (i32, i32) = (96, 32);
 
 #[test]
-fn origin_is_offset_from_cursor_at_scale_one() {
-    assert_eq!(popup_origin((100, 200), 1.0), (116.0, 216.0));
+fn sits_above_and_right_of_cursor() {
+    assert_eq!(popup_origin((500, 500), SIZE, SCREEN), (512, 456));
 }
 
 #[test]
-fn origin_converts_physical_point_to_logical() {
-    assert_eq!(popup_origin((300, 600), 1.5), (216.0, 416.0));
+fn drops_below_when_no_room_above() {
+    assert_eq!(popup_origin((500, 10), SIZE, SCREEN), (512, 22));
 }
 
 #[test]
-fn dpi_maps_to_scale() {
-    assert_eq!(dpi_scale(96), 1.0);
-    assert_eq!(dpi_scale(144), 1.5);
+fn clamps_to_right_edge() {
+    assert_eq!(popup_origin((1900, 500), SIZE, SCREEN).0, 1824);
+}
+
+#[test]
+fn follows_a_monitor_on_the_left() {
+    let left = Area {
+        left: -1920,
+        top: 0,
+        right: 0,
+        bottom: 1080,
+    };
+    assert_eq!(popup_origin((-100, 500), SIZE, left).0, -96);
+}
+
+#[test]
+fn pixel_size_scales_with_dpi() {
+    assert_eq!(pixel_size(96), (96, 32));
+    assert_eq!(pixel_size(144), (144, 48));
 }

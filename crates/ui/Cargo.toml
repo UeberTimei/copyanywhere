@@ -9,3 +9,13 @@ domain = { path = "../domain" }
 gpui = "0.2.2"
 tray-icon = "0.26"
 thiserror = "2"
+raw-window-handle = "0.6"
+
+[dependencies.windows]
+version = "0.61"
+features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_UI_HiDpi",
+  "Win32_UI_WindowsAndMessaging",
+]

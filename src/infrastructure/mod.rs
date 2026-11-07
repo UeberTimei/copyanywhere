@@ -1,7 +1,7 @@
-pub mod settings_file;
 pub mod autostart;
+pub mod clipboard;
 pub mod foreground;
 pub mod keyboard;
-pub mod clipboard;
-pub mod sound;
 pub mod mouse_hook;
+pub mod settings_file;
+pub mod sound;

@@ -6,7 +6,7 @@ use gpui::{
     AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, point, prelude::*, px, size,
 };
 
-use crate::native_window::{Spot, show_at};
+use crate::native_window::{Spot, handle_of, show_at};
 use crate::placement::corner_at;
 use crate::settings_logic::{self, Feature};
 use crate::theme;
@@ -48,9 +48,12 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
         origin: corner_at,
         activate: true,
     };
-    handle
-        .update(cx, |_, window, _| show_at(window, &spot))
-        .ok()?;
+    cx.spawn(async move |cx| {
+        if let Ok(Some(hwnd)) = handle.update(cx, |_, window, _| handle_of(window)) {
+            show_at(hwnd, &spot);
+        }
+    })
+    .detach();
     Some(handle.into())
 }
 

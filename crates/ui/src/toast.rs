@@ -8,7 +8,7 @@ use gpui::{
     point, px, size,
 };
 
-use crate::native_window::{Spot, show_at};
+use crate::native_window::{Spot, handle_of, show_at};
 use crate::placement::above_right;
 use view::ToastView;
 
@@ -35,18 +35,16 @@ pub fn show(cx: &mut App, at: (i32, i32)) {
     let Ok(handle) = cx.open_window(options, |_, cx| cx.new(|_| ToastView::new())) else {
         return;
     };
-    handle
-        .update(cx, |_, window, _| {
-            let spot = Spot {
-                at,
-                logical_size: TOAST_SIZE,
-                origin: above_right,
-                activate: false,
-            };
-            show_at(window, &spot)
-        })
-        .ok();
+    let spot = Spot {
+        at,
+        logical_size: TOAST_SIZE,
+        origin: above_right,
+        activate: false,
+    };
     cx.spawn(async move |cx| {
+        if let Ok(Some(hwnd)) = handle.update(cx, |_, window, _| handle_of(window)) {
+            show_at(hwnd, &spot);
+        }
         cx.background_executor().timer(fade::LIFETIME).await;
         handle
             .update(cx, |_, window, _| window.remove_window())

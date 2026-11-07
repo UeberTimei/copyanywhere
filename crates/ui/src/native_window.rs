@@ -19,11 +19,9 @@ pub struct Spot {
     pub activate: bool,
 }
 
-// GPUI opens windows on the primary monitor, so the real position is set natively
-pub fn show_at(window: &Window, spot: &Spot) {
-    let Some(hwnd) = native_handle(window) else {
-        return;
-    };
+// GPUI opens windows on the primary monitor, so the real position is set natively.
+// Must run outside an app update: showing the window makes GPUI paint synchronously
+pub fn show_at(hwnd: HWND, spot: &Spot) {
     let screen = monitor_area(spot.at);
     let keep_focus = if spot.activate {
         SET_WINDOW_POS_FLAGS(0)
@@ -54,7 +52,7 @@ pub fn show_at(window: &Window, spot: &Spot) {
     }
 }
 
-fn native_handle(window: &Window) -> Option<HWND> {
+pub fn handle_of(window: &Window) -> Option<HWND> {
     match HasWindowHandle::window_handle(window).ok()?.as_raw() {
         RawWindowHandle::Win32(handle) => Some(HWND(handle.hwnd.get() as *mut _)),
         _ => None,

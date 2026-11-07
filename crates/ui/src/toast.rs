@@ -3,6 +3,8 @@ mod fade;
 mod tests;
 mod view;
 
+use std::time::{Duration, Instant};
+
 use gpui::{
     App, AppContext, Bounds, WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions,
     point, px, size,
@@ -12,11 +14,12 @@ use crate::native_window::{Spot, handle_of, show_at};
 use crate::placement::above_right;
 use view::ToastView;
 
+const FRAME: Duration = Duration::from_millis(16);
 const TOAST_SIZE: (f32, f32) = (96.0, 32.0);
 
 pub fn show(cx: &mut App, at: (i32, i32)) {
-    // GPUI falls back to a huge window when bounds miss the primary monitor, so
-    // it opens on the primary one hidden and show_at moves it for real
+    // GPUI opens it at the top-left of the primary monitor, fully transparent until faded in,
+    // and show_at then moves it next to the cursor
     let bounds = Bounds::new(
         point(px(0.), px(0.)),
         size(px(TOAST_SIZE.0), px(TOAST_SIZE.1)),
@@ -24,7 +27,7 @@ pub fn show(cx: &mut App, at: (i32, i32)) {
     let options = WindowOptions {
         window_bounds: Some(WindowBounds::Windowed(bounds)),
         focus: false,
-        show: false,
+        show: true,
         window_background: WindowBackgroundAppearance::Transparent,
         kind: WindowKind::PopUp,
         is_movable: false,
@@ -45,7 +48,11 @@ pub fn show(cx: &mut App, at: (i32, i32)) {
         if let Ok(Some(hwnd)) = handle.update(cx, |_, window, _| handle_of(window)) {
             show_at(hwnd, &spot);
         }
-        cx.background_executor().timer(fade::LIFETIME).await;
+        let started = Instant::now();
+        while started.elapsed() < fade::LIFETIME {
+            cx.background_executor().timer(FRAME).await;
+            handle.update(cx, |_, window, _| window.refresh()).ok();
+        }
         handle
             .update(cx, |_, window, _| window.remove_window())
             .ok();

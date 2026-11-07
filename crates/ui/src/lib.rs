@@ -1,3 +1,4 @@
+pub mod anchor;
 pub mod card;
 pub mod exclusion_list;
 pub mod program_picker;

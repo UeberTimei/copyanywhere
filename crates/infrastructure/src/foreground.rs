@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::collections::BTreeSet;
 
 use windows::Win32::Foundation::{CloseHandle, HWND, LPARAM};

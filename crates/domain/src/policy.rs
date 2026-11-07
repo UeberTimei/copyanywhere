@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use super::exclusions::ExcludedPrograms;
 
 pub fn should_copy(enabled: bool, program: Option<&str>, excluded: &ExcludedPrograms) -> bool {

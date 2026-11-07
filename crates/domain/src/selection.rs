@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MouseEvent {
     Down { x: i32, y: i32, at_ms: u64 },

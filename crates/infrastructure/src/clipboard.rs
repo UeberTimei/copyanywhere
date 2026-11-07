@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use windows::Win32::System::DataExchange::{
     GetClipboardSequenceNumber, IsClipboardFormatAvailable,
 };

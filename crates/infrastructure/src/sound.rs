@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use windows::Win32::Media::Audio::{PlaySoundW, SND_ALIAS, SND_ASYNC, SND_FLAGS, SND_NODEFAULT};
 use windows::core::w;
 

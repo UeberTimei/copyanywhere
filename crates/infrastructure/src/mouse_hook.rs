@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use std::sync::{OnceLock, mpsc::Sender};
 
 use windows::Win32::Foundation::{LPARAM, LRESULT, POINT, WPARAM};

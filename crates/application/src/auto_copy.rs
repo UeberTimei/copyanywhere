@@ -8,6 +8,7 @@ use crate::ports::{Clipboard, Feedback, Foreground};
 use crate::session::Session;
 
 const WAIT: Duration = Duration::from_millis(300);
+const SETTLE: Duration = Duration::from_millis(80);
 const POLL: Duration = Duration::from_millis(10);
 
 pub struct AutoCopy<C, F, B> {
@@ -37,6 +38,7 @@ impl<C: Clipboard, F: Foreground, B: Feedback> AutoCopy<C, F, B> {
         ) {
             return;
         }
+        thread::sleep(SETTLE);
         let before = self.clipboard.sequence();
         self.clipboard.send_copy();
         if self.wait_for_text(before) {

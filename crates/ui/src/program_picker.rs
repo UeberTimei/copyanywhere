@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{Div, IntoElement, Stateful, div, prelude::*, px, rgb, rgba};
+use gpui_kit::{Div, IntoElement, Stateful, div, prelude::*, px, rgb, rgba};
 
 use crate::card::muted_text;
 use crate::exclusion_list::{Callback, program_row};

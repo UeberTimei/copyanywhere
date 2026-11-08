@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use gpui::{App, Div, div, prelude::*, px, rgb};
+use gpui_kit::{App, Div, div, prelude::*, px, rgb};
 
 use crate::card::{card, muted_text};
 use crate::theme;

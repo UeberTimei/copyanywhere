@@ -3,7 +3,7 @@ use std::sync::mpsc::Receiver;
 use std::time::Duration;
 
 use application::session::Session;
-use gpui::{AnyWindowHandle, App, Application};
+use gpui_kit::{AnyWindowHandle, App, application};
 use infrastructure::mouse_hook;
 use ui::tray::{Tray, TrayCommand};
 use ui::{anchor, settings_window, toast};
@@ -13,7 +13,7 @@ use crate::actions::settings_actions;
 const TICK: Duration = Duration::from_millis(16);
 
 pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
-    Application::new().run(move |cx: &mut App| {
+    application().run(move |cx: &mut App| {
         anchor::open(cx);
         let mut window: Option<AnyWindowHandle> = None;
         cx.spawn(async move |cx| {
@@ -26,8 +26,7 @@ pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
                     while let Some(command) = tray.poll() {
                         handle(command, &session, &tray, &mut window, cx);
                     }
-                })
-                .ok();
+                });
             }
         })
         .detach();

@@ -1,4 +1,4 @@
-use gpui::{
+use gpui_kit::{
     App, AppContext, Bounds, Context, IntoElement, Render, Window, WindowBounds, WindowKind,
     WindowOptions, div, point, px, size,
 };

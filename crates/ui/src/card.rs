@@ -1,4 +1,4 @@
-use gpui::{Div, FontWeight, IntoElement, div, prelude::*, px, rgb, rgba};
+use gpui_kit::{Div, FontWeight, IntoElement, div, prelude::*, px, rgb, rgba};
 
 use crate::theme;
 

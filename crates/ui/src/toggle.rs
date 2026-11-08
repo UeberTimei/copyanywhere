@@ -1,4 +1,4 @@
-use gpui::{
+use gpui_kit::{
     App, ClickEvent, ElementId, IntoElement, RenderOnce, Window, div, prelude::*, px, rgb, rgba,
 };
 

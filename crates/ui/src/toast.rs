@@ -5,7 +5,7 @@ mod view;
 
 use std::time::{Duration, Instant};
 
-use gpui::{
+use gpui_kit::{
     App, AppContext, Bounds, WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions,
     point, px, size,
 };

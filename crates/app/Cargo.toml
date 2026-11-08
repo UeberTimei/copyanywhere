@@ -9,4 +9,4 @@ domain = { path = "../domain" }
 infrastructure = { path = "../infrastructure" }
 ui = { path = "../ui" }
 anyhow = "1"
-gpui = "0.2.2"
+gpui-kit = "0.9.0"

@@ -2,7 +2,7 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 use domain::settings::Settings;
-use gpui::{
+use gpui_kit::{
     AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, point, prelude::*, px, size,
 };
 

@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
-use gpui::{App, ClickEvent, Context, IntoElement, Render, Window, div, prelude::*, px, rgb, rgba};
+use gpui_kit::{
+    App, ClickEvent, Context, IntoElement, Render, Window, div, prelude::*, px, rgb, rgba,
+};
 
 use crate::card::{card, section};
 use crate::exclusion_list::{Callback, exclusion_card};

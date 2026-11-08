@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use gpui::{Context, IntoElement, Render, Window, div, prelude::*, px};
+use gpui_kit::{Context, IntoElement, Render, Window, div, prelude::*, px};
 
 use super::fade::{self, tint};
 

@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use gpui::{Rgba, rgba};
+use gpui_kit::{Rgba, rgba};
 
 pub const LIFETIME: Duration = Duration::from_millis(1100);
 const FADE_IN: Duration = Duration::from_millis(80);

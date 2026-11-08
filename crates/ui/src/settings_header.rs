@@ -1,4 +1,4 @@
-use gpui::{
+use gpui_kit::{
     ClickEvent, FontWeight, IntoElement, Window, WindowControlArea, div, prelude::*, px, rgb, rgba,
 };
 

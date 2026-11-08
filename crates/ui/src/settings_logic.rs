@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
 use domain::exclusions::ExcludedPrograms;
+use domain::program::Program;
 use domain::settings::Settings;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -27,12 +28,15 @@ pub fn apply_toggle(settings: &mut Settings, feature: Feature) {
     *flag = !*flag;
 }
 
-pub fn pickable_programs(running: Vec<String>, excluded: &ExcludedPrograms) -> Vec<String> {
-    let unique: BTreeMap<String, String> = running
+pub fn pickable_programs(running: Vec<Program>, excluded: &ExcludedPrograms) -> Vec<Program> {
+    let unique: BTreeMap<String, Program> = running
         .into_iter()
-        .map(|name| name.trim().to_owned())
-        .filter(|name| !name.is_empty() && !excluded.contains(name))
-        .map(|name| (name.to_lowercase(), name))
+        .map(|program| Program {
+            exe: program.exe.trim().to_owned(),
+            ..program
+        })
+        .filter(|program| !program.exe.is_empty() && !excluded.contains(&program.exe))
+        .map(|program| (program.exe.to_lowercase(), program))
         .collect();
     unique.into_values().collect()
 }

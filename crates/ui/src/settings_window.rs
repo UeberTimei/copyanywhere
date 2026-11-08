@@ -1,6 +1,7 @@
 use std::rc::Rc;
 use std::sync::Arc;
 
+use domain::program::Program;
 use domain::settings::Settings;
 use gpui_kit::{
     AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, open_window, point,
@@ -16,8 +17,8 @@ pub struct SettingsActions {
     pub settings: Settings,
     pub enabled: bool,
     pub save: Rc<dyn Fn(Settings)>,
-    pub running_programs: Arc<dyn Fn() -> Vec<String>>,
-    pub pick_program: Arc<dyn Fn() -> Option<String> + Send + Sync>,
+    pub running_programs: Arc<dyn Fn() -> Vec<Program>>,
+    pub pick_program: Arc<dyn Fn() -> Option<Program> + Send + Sync>,
 }
 
 pub struct SettingsView {
@@ -25,9 +26,10 @@ pub struct SettingsView {
     pub(crate) enabled: bool,
     pub(crate) picker_open: bool,
     pub(crate) picker_toggles: usize,
+    programs: Vec<Program>,
     save: Rc<dyn Fn(Settings)>,
-    running_programs: Arc<dyn Fn() -> Vec<String>>,
-    pick_program: Arc<dyn Fn() -> Option<String> + Send + Sync>,
+    running_programs: Arc<dyn Fn() -> Vec<Program>>,
+    pick_program: Arc<dyn Fn() -> Option<Program> + Send + Sync>,
 }
 
 pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<AnyWindowHandle> {
@@ -62,7 +64,9 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
 
 impl SettingsView {
     fn new(actions: SettingsActions) -> Self {
+        let programs = (actions.running_programs)();
         Self {
+            programs,
             settings: actions.settings,
             enabled: actions.enabled,
             picker_open: false,
@@ -73,8 +77,30 @@ impl SettingsView {
         }
     }
 
-    pub(crate) fn pickable(&self) -> Vec<String> {
-        settings_logic::pickable_programs((self.running_programs)(), &self.settings.excluded)
+    pub(crate) fn pickable(&self) -> Vec<Program> {
+        settings_logic::pickable_programs(self.programs.clone(), &self.settings.excluded)
+    }
+
+    /// Excluded programs, titled whenever a running or browsed program told us their name.
+    pub(crate) fn excluded_programs(&self) -> Vec<Program> {
+        self.settings
+            .excluded
+            .iter()
+            .map(|exe| {
+                let known = self
+                    .programs
+                    .iter()
+                    .find(|p| p.exe.eq_ignore_ascii_case(exe));
+                known.cloned().unwrap_or_else(|| Program::bare(exe))
+            })
+            .collect()
+    }
+
+    fn remember(&mut self, program: Program) {
+        match self.programs.iter_mut().find(|p| p.exe == program.exe) {
+            Some(known) => *known = program,
+            None => self.programs.push(program),
+        }
     }
 
     pub(crate) fn toggle_feature(&mut self, feature: Feature, cx: &mut Context<Self>) {
@@ -103,8 +129,13 @@ impl SettingsView {
         let pick = Arc::clone(&self.pick_program);
         cx.spawn(async move |this, cx| {
             let picked = cx.background_spawn(async move { pick() }).await;
-            if let Some(name) = picked {
-                this.update(cx, |this, cx| this.add_program(&name, cx)).ok();
+            if let Some(program) = picked {
+                this.update(cx, |this, cx| {
+                    let exe = program.exe.clone();
+                    this.remember(program);
+                    this.add_program(&exe, cx);
+                })
+                .ok();
             }
         })
         .detach();
@@ -112,6 +143,11 @@ impl SettingsView {
 
     pub(crate) fn toggle_picker(&mut self, cx: &mut Context<Self>) {
         self.picker_open = !self.picker_open;
+        if self.picker_open {
+            for program in (self.running_programs)() {
+                self.remember(program);
+            }
+        }
         self.picker_toggles += 1;
         cx.notify();
     }

@@ -31,7 +31,7 @@ impl Render for SettingsView {
         let pick: Callback = Rc::new(move |name: &str, cx: &mut App| {
             view.update(cx, |this, cx| this.add_program(name, cx))
         });
-        let programs: Vec<String> = self.settings.excluded.iter().map(String::from).collect();
+        let programs = self.excluded_programs();
         let reveal = Reveal {
             open: self.picker_open,
             toggles: self.picker_toggles,

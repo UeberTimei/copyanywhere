@@ -1,4 +1,6 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+
+use domain::program::Program;
 
 use windows::Win32::Foundation::{CloseHandle, HWND, LPARAM};
 use windows::Win32::System::Threading::{
@@ -9,6 +11,8 @@ use windows::Win32::UI::WindowsAndMessaging::{
     IsWindowVisible,
 };
 use windows::core::{BOOL, PWSTR};
+
+use crate::program_title::describe;
 
 #[cfg(test)]
 mod tests;
@@ -21,18 +25,22 @@ pub fn exe_name(path: &str) -> String {
 }
 
 pub fn foreground_program() -> Option<String> {
-    window_program(unsafe { GetForegroundWindow() })
+    window_path(unsafe { GetForegroundWindow() }).map(|path| exe_name(&path))
 }
 
-pub fn running_programs() -> Vec<String> {
+pub fn running_programs() -> Vec<Program> {
     let mut handles: Vec<HWND> = Vec::new();
     let lparam = LPARAM(&mut handles as *mut Vec<HWND> as isize);
     let _ = unsafe { EnumWindows(Some(collect_titled_window), lparam) };
     handles
         .into_iter()
-        .filter_map(window_program)
+        .filter_map(window_path)
         .collect::<BTreeSet<_>>()
-        .into_iter()
+        .iter()
+        .map(|path| describe(path))
+        .map(|program| (program.exe.clone(), program))
+        .collect::<BTreeMap<_, _>>()
+        .into_values()
         .collect()
 }
 
@@ -46,10 +54,10 @@ unsafe extern "system" fn collect_titled_window(hwnd: HWND, lparam: LPARAM) -> B
     BOOL(1)
 }
 
-fn window_program(hwnd: HWND) -> Option<String> {
+fn window_path(hwnd: HWND) -> Option<String> {
     let mut pid = 0u32;
     unsafe { GetWindowThreadProcessId(hwnd, Some(&mut pid)) };
-    process_image_path(pid).map(|path| exe_name(&path))
+    process_image_path(pid)
 }
 
 fn process_image_path(pid: u32) -> Option<String> {

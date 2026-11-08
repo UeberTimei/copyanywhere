@@ -1,4 +1,5 @@
 use domain::exclusions::ExcludedPrograms;
+use domain::program::Program;
 use domain::settings::Settings;
 
 use super::{Feature, apply_toggle, is_on, pickable_programs};
@@ -18,20 +19,23 @@ fn apply_toggle_flips_each_feature() {
 fn pickable_skips_excluded_case_insensitively() {
     let mut excluded = ExcludedPrograms::default();
     excluded.add("Code.exe");
-    let picks = pickable_programs(vec!["CODE.exe".into(), "notepad.exe".into()], &excluded);
-    assert_eq!(picks, ["notepad.exe"]);
+    let picks = pickable_programs(
+        vec![Program::bare("CODE.exe"), Program::bare("notepad.exe")],
+        &excluded,
+    );
+    assert_eq!(picks, [Program::bare("notepad.exe")]);
 }
 
 #[test]
 fn pickable_drops_blank_and_duplicate_names() {
     let excluded = ExcludedPrograms::default();
     let running = vec![
-        "  ".into(),
-        "zed.EXE".into(),
-        "Zed.exe".into(),
-        "Alpha.exe".into(),
+        Program::bare("  "),
+        Program::bare("zed.EXE"),
+        Program::bare("Zed.exe"),
+        Program::bare("Alpha.exe"),
     ];
     let picks = pickable_programs(running, &excluded);
     assert_eq!(picks.len(), 2);
-    assert_eq!(picks[0], "Alpha.exe");
+    assert_eq!(picks[0].exe, "Alpha.exe");
 }

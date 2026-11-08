@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use domain::program::Program;
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::group_box::{GroupBox, GroupBoxVariants};
 use gpui_kit::{AnimationExt, App, IntoElement, div, prelude::*, px};
@@ -10,7 +11,7 @@ use crate::text::muted;
 use crate::theme;
 
 pub fn program_picker(
-    programs: &[String],
+    programs: &[Program],
     on_pick: &Callback,
     reveal: Reveal,
     cx: &App,
@@ -23,8 +24,8 @@ pub fn program_picker(
         programs
             .iter()
             .enumerate()
-            .fold(GroupBox::new().outline(), |group, (index, name)| {
-                group.child(pick_button(index, name, on_pick))
+            .fold(GroupBox::new().outline(), |group, (index, program)| {
+                group.child(pick_button(index, program, on_pick))
             })
     };
     div()
@@ -45,11 +46,11 @@ pub fn program_picker(
         )
 }
 
-fn pick_button(index: usize, name: &str, on_pick: &Callback) -> Button {
-    let label = name.to_owned();
+fn pick_button(index: usize, program: &Program, on_pick: &Callback) -> Button {
+    let exe = program.exe.clone();
     let on_pick = Rc::clone(on_pick);
     Button::new(("pick", index))
         .ghost()
-        .label(label.clone())
-        .on_click(move |_, _, cx| on_pick(&label, cx))
+        .label(program.label())
+        .on_click(move |_, _, cx| on_pick(&exe, cx))
 }

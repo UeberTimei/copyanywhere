@@ -1,4 +1,4 @@
-use super::{Area, above_right, corner_at, pixel_size};
+use super::{Area, above_right, centered_above, pixel_size};
 
 const SCREEN: Area = Area {
     left: 0,
@@ -35,13 +35,16 @@ fn toast_follows_a_monitor_on_the_left() {
 }
 
 #[test]
-fn window_has_its_corner_at_the_cursor() {
-    assert_eq!(corner_at((1900, 1030), (440, 560), SCREEN), (1460, 470));
+fn window_is_centered_above_the_cursor() {
+    assert_eq!(centered_above((1000, 1030), (540, 560), SCREEN), (730, 458));
 }
 
 #[test]
-fn window_stays_on_screen_near_the_top_left() {
-    assert_eq!(corner_at((100, 100), (440, 560), SCREEN), (0, 0));
+fn window_stays_on_screen_near_the_right_edge() {
+    assert_eq!(
+        centered_above((1900, 1030), (540, 560), SCREEN),
+        (1380, 458)
+    );
 }
 
 #[test]

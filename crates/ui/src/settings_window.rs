@@ -9,7 +9,7 @@ use gpui_kit::{
 };
 
 use crate::native_window::{Spot, handle_of, show_at};
-use crate::placement::corner_at;
+use crate::placement::centered_above;
 use crate::settings_logic::{self, Feature};
 use crate::theme;
 
@@ -50,7 +50,7 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
     let spot = Spot {
         at,
         logical_size,
-        origin: corner_at,
+        origin: centered_above,
         activate: true,
     };
     cx.spawn(async move |cx| {

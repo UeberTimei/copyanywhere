@@ -31,8 +31,14 @@ pub fn above_right(at: (i32, i32), size: (i32, i32), screen: Area) -> (i32, i32)
     inside(at.0 + CURSOR_OFFSET, y, size, screen)
 }
 
-pub fn corner_at(at: (i32, i32), size: (i32, i32), screen: Area) -> (i32, i32) {
-    inside(at.0 - size.0, at.1 - size.1, size, screen)
+pub fn centered_above(at: (i32, i32), size: (i32, i32), screen: Area) -> (i32, i32) {
+    let above = at.1 - size.1 - CURSOR_OFFSET;
+    let y = if above >= screen.top {
+        above
+    } else {
+        at.1 + CURSOR_OFFSET
+    };
+    inside(at.0 - size.0 / 2, y, size, screen)
 }
 
 fn inside(x: i32, y: i32, size: (i32, i32), screen: Area) -> (i32, i32) {

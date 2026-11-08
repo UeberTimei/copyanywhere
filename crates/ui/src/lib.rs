@@ -3,6 +3,7 @@ pub mod exclusion_list;
 pub mod native_window;
 pub mod placement;
 pub mod program_picker;
+pub mod reveal;
 pub mod settings_header;
 pub mod settings_logic;
 pub mod settings_render;

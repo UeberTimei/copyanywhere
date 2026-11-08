@@ -24,6 +24,7 @@ pub struct SettingsView {
     pub(crate) settings: Settings,
     pub(crate) enabled: bool,
     pub(crate) picker_open: bool,
+    pub(crate) picker_toggles: usize,
     save: Rc<dyn Fn(Settings)>,
     running_programs: Arc<dyn Fn() -> Vec<String>>,
     pick_program: Arc<dyn Fn() -> Option<String> + Send + Sync>,
@@ -65,6 +66,7 @@ impl SettingsView {
             settings: actions.settings,
             enabled: actions.enabled,
             picker_open: false,
+            picker_toggles: 0,
             save: actions.save,
             running_programs: actions.running_programs,
             pick_program: actions.pick_program,
@@ -110,6 +112,7 @@ impl SettingsView {
 
     pub(crate) fn toggle_picker(&mut self, cx: &mut Context<Self>) {
         self.picker_open = !self.picker_open;
+        self.picker_toggles += 1;
         cx.notify();
     }
 

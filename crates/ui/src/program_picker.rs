@@ -1,19 +1,18 @@
 use std::rc::Rc;
-use std::time::Duration;
 
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::group_box::{GroupBox, GroupBoxVariants};
-use gpui_kit::{
-    Animation, AnimationExt, App, IntoElement, div, ease_out_quint, prelude::*, px,
-};
+use gpui_kit::{AnimationExt, App, IntoElement, div, prelude::*, px};
 
 use crate::exclusion_list::Callback;
+use crate::reveal::Reveal;
 use crate::text::muted;
 use crate::theme;
 
 pub fn program_picker(
     programs: &[String],
     on_pick: &Callback,
+    reveal: Reveal,
     cx: &App,
 ) -> impl IntoElement + use<> {
     let group = if programs.is_empty() {
@@ -31,16 +30,16 @@ pub fn program_picker(
     div()
         .id("program-picker")
         .w_full()
-        .max_h(px(theme::PICKER_MAX_HEIGHT))
         .overflow_y_scroll()
         .child(group)
         .with_animation(
-            "program-picker-open",
-            Animation::new(Duration::from_millis(theme::PICKER_ANIMATION_MS))
-                .with_easing(ease_out_quint()),
-            |picker, progress| {
+            reveal.id("program-picker-reveal"),
+            reveal.animation(),
+            move |picker, t| {
+                let progress = reveal.progress(t);
                 picker
                     .max_h(px(theme::PICKER_MAX_HEIGHT * progress))
+                    .mt(px(theme::SECTION_GAP * progress))
                     .opacity(progress)
             },
         )

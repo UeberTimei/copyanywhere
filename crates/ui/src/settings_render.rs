@@ -23,15 +23,13 @@ impl Render for SettingsView {
                 view.update(cx, |this, cx| this.remove_program(name, cx))
             })
         };
-        let browse_view = view.clone();
         let pick: Callback = Rc::new(move |name: &str, cx: &mut App| {
             view.update(cx, |this, cx| this.add_program(name, cx))
         });
-        let browse = move |cx: &mut App| browse_view.update(cx, |this, cx| this.browse_program(cx));
         let programs: Vec<String> = self.settings.excluded.iter().map(String::from).collect();
         let picker = self
             .picker_open
-            .then(|| program_picker(&self.pickable(), &pick, browse, cx));
+            .then(|| program_picker(&self.pickable(), &pick, cx));
 
         div()
             .id("settings")
@@ -71,7 +69,7 @@ impl Render for SettingsView {
                     .gap_2()
                     .child(muted("Auto-copy is skipped in these programs", cx))
                     .child(exclusion_list(&programs, &remove, cx))
-                    .child(add_button(cx))
+                    .child(add_buttons(cx))
                     .children(picker),
             )
     }
@@ -90,9 +88,20 @@ fn toggle_row(
         .on_click(cx.listener(move |this, _: &bool, _, cx| this.toggle_feature(feature, cx)))
 }
 
-fn add_button(cx: &Context<SettingsView>) -> impl IntoElement {
-    Button::new("add-program")
-        .outline()
-        .label("Add program")
-        .on_click(cx.listener(|this, _, _, cx| this.toggle_picker(cx)))
+fn add_buttons(cx: &Context<SettingsView>) -> impl IntoElement {
+    div()
+        .flex()
+        .gap_2()
+        .child(
+            Button::new("add-program")
+                .outline()
+                .label("Add current program")
+                .on_click(cx.listener(|this, _, _, cx| this.toggle_picker(cx))),
+        )
+        .child(
+            Button::new("browse-program")
+                .outline()
+                .label("Browse a program")
+                .on_click(cx.listener(|this, _, _, cx| this.browse_program(cx))),
+        )
 }

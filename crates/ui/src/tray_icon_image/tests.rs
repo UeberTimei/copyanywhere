@@ -17,13 +17,18 @@ fn buffer_holds_four_bytes_per_pixel() {
 }
 
 #[test]
-fn centre_is_accent_when_enabled() {
-    assert_eq!(pixel(&rgba(true), 16, 16), [0x46, 0xc2, 0xa1, 0xff]);
+fn front_sheet_edge_is_accent_when_enabled() {
+    assert_eq!(pixel(&rgba(true), 13, 21), [0x46, 0xc2, 0xa1, 0xff]);
 }
 
 #[test]
-fn centre_is_muted_when_disabled() {
-    assert_eq!(pixel(&rgba(false), 16, 16), [0x85, 0x85, 0x8b, 0xff]);
+fn front_sheet_edge_is_red_when_disabled() {
+    assert_eq!(pixel(&rgba(false), 13, 21), [0xe5, 0x48, 0x4d, 0xff]);
+}
+
+#[test]
+fn sheet_interior_is_transparent() {
+    assert_eq!(pixel(&rgba(true), 21, 21)[3], 0);
 }
 
 #[test]

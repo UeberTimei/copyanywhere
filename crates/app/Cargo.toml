@@ -10,3 +10,6 @@ infrastructure = { path = "../infrastructure" }
 ui = { path = "../ui" }
 anyhow = "1"
 gpui-kit = "0.9.0"
+
+[build-dependencies]
+winresource = "0.1"

@@ -26,6 +26,7 @@ pub struct SettingsView {
     pub(crate) enabled: bool,
     pub(crate) picker_open: bool,
     pub(crate) picker_toggles: usize,
+    browsing: bool,
     programs: Vec<Program>,
     save: Rc<dyn Fn(Settings)>,
     running_programs: Arc<dyn Fn() -> Vec<Program>>,
@@ -45,8 +46,19 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
         show: true,
         ..Default::default()
     };
-    let (handle, _) =
-        open_window(options, cx, |_, cx| cx.new(|_| SettingsView::new(actions))).ok()?;
+    let (handle, _) = open_window(options, cx, |window, cx| {
+        cx.new(|cx| {
+            cx.observe_window_activation(window, |this: &mut SettingsView, window, _| {
+                // The browse dialog takes focus on purpose; every other focus loss means a click elsewhere.
+                if !window.is_window_active() && !this.browsing {
+                    window.remove_window();
+                }
+            })
+            .detach();
+            SettingsView::new(actions)
+        })
+    })
+    .ok()?;
     let spot = Spot {
         at,
         logical_size,
@@ -71,6 +83,7 @@ impl SettingsView {
             enabled: actions.enabled,
             picker_open: false,
             picker_toggles: 0,
+            browsing: false,
             save: actions.save,
             running_programs: actions.running_programs,
             pick_program: actions.pick_program,
@@ -127,8 +140,10 @@ impl SettingsView {
     pub(crate) fn browse_program(&mut self, cx: &mut Context<Self>) {
         // The dialog runs its own message loop; on the UI thread it re-enters gpui while the click is still being handled.
         let pick = Arc::clone(&self.pick_program);
+        self.browsing = true;
         cx.spawn(async move |this, cx| {
             let picked = cx.background_spawn(async move { pick() }).await;
+            this.update(cx, |this, _| this.browsing = false).ok();
             if let Some(program) = picked {
                 this.update(cx, |this, cx| {
                     let exe = program.exe.clone();

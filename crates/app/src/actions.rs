@@ -13,7 +13,7 @@ pub fn settings_actions(session: &Arc<Session>) -> SettingsActions {
         enabled: session.is_enabled(),
         save: Rc::new(move |next| persist(&target, next)),
         running_programs: Arc::new(foreground::running_programs),
-        pick_program: Rc::new(file_dialog::pick_program),
+        pick_program: Arc::new(file_dialog::pick_program),
     }
 }
 

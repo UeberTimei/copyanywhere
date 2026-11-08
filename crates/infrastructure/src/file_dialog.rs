@@ -1,6 +1,7 @@
 use windows::Win32::UI::Controls::Dialogs::{
-    GetOpenFileNameW, OFN_FILEMUSTEXIST, OFN_NOCHANGEDIR, OPENFILENAMEW,
+    GetOpenFileNameW, OFN_EXPLORER, OFN_FILEMUSTEXIST, OFN_NOCHANGEDIR, OPENFILENAMEW,
 };
+use windows::Win32::UI::WindowsAndMessaging::GetForegroundWindow;
 use windows::core::{PCWSTR, PWSTR};
 
 use crate::foreground::exe_name;
@@ -12,10 +13,11 @@ pub fn pick_program() -> Option<String> {
     let mut buffer = [0u16; 1024];
     let mut dialog = OPENFILENAMEW {
         lStructSize: size_of::<OPENFILENAMEW>() as u32,
+        hwndOwner: unsafe { GetForegroundWindow() },
         lpstrFilter: PCWSTR(filter.as_ptr()),
         lpstrFile: PWSTR(buffer.as_mut_ptr()),
         nMaxFile: buffer.len() as u32,
-        Flags: OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR,
+        Flags: OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR,
         ..Default::default()
     };
     if !unsafe { GetOpenFileNameW(&mut dialog) }.as_bool() {

@@ -17,7 +17,7 @@ pub struct SettingsActions {
     pub enabled: bool,
     pub save: Rc<dyn Fn(Settings)>,
     pub running_programs: Arc<dyn Fn() -> Vec<String>>,
-    pub pick_program: Rc<dyn Fn() -> Option<String>>,
+    pub pick_program: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 }
 
 pub struct SettingsView {
@@ -26,7 +26,7 @@ pub struct SettingsView {
     pub(crate) picker_open: bool,
     save: Rc<dyn Fn(Settings)>,
     running_programs: Arc<dyn Fn() -> Vec<String>>,
-    pick_program: Rc<dyn Fn() -> Option<String>>,
+    pick_program: Arc<dyn Fn() -> Option<String> + Send + Sync>,
 }
 
 pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<AnyWindowHandle> {
@@ -97,9 +97,15 @@ impl SettingsView {
     }
 
     pub(crate) fn browse_program(&mut self, cx: &mut Context<Self>) {
-        if let Some(name) = (self.pick_program)() {
-            self.add_program(&name, cx);
-        }
+        // The dialog runs its own message loop; on the UI thread it re-enters gpui while the click is still being handled.
+        let pick = Arc::clone(&self.pick_program);
+        cx.spawn(async move |this, cx| {
+            let picked = cx.background_spawn(async move { pick() }).await;
+            if let Some(name) = picked {
+                this.update(cx, |this, cx| this.add_program(&name, cx)).ok();
+            }
+        })
+        .detach();
     }
 
     pub(crate) fn toggle_picker(&mut self, cx: &mut Context<Self>) {

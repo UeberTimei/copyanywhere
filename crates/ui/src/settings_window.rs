@@ -17,6 +17,7 @@ pub struct SettingsActions {
     pub enabled: bool,
     pub save: Rc<dyn Fn(Settings)>,
     pub running_programs: Arc<dyn Fn() -> Vec<String>>,
+    pub pick_program: Rc<dyn Fn() -> Option<String>>,
 }
 
 pub struct SettingsView {
@@ -25,6 +26,7 @@ pub struct SettingsView {
     pub(crate) picker_open: bool,
     save: Rc<dyn Fn(Settings)>,
     running_programs: Arc<dyn Fn() -> Vec<String>>,
+    pick_program: Rc<dyn Fn() -> Option<String>>,
 }
 
 pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<AnyWindowHandle> {
@@ -65,6 +67,7 @@ impl SettingsView {
             picker_open: false,
             save: actions.save,
             running_programs: actions.running_programs,
+            pick_program: actions.pick_program,
         }
     }
 
@@ -91,6 +94,12 @@ impl SettingsView {
             },
             cx,
         );
+    }
+
+    pub(crate) fn browse_program(&mut self, cx: &mut Context<Self>) {
+        if let Some(name) = (self.pick_program)() {
+            self.add_program(&name, cx);
+        }
     }
 
     pub(crate) fn toggle_picker(&mut self, cx: &mut Context<Self>) {

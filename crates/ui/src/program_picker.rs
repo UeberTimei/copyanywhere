@@ -8,7 +8,12 @@ use crate::exclusion_list::Callback;
 use crate::text::muted;
 use crate::theme;
 
-pub fn program_picker(programs: &[String], on_pick: &Callback, cx: &App) -> Stateful<Div> {
+pub fn program_picker(
+    programs: &[String],
+    on_pick: &Callback,
+    on_browse: impl Fn(&mut App) + 'static,
+    cx: &App,
+) -> Stateful<Div> {
     let group = if programs.is_empty() {
         GroupBox::new()
             .outline()
@@ -26,6 +31,12 @@ pub fn program_picker(programs: &[String], on_pick: &Callback, cx: &App) -> Stat
         .max_h(px(theme::PICKER_MAX_HEIGHT))
         .overflow_y_scroll()
         .child(group)
+        .child(
+            Button::new("browse-program")
+                .outline()
+                .label("Browse for program…")
+                .on_click(move |_, _, cx| on_browse(cx)),
+        )
 }
 
 fn pick_button(index: usize, name: &str, on_pick: &Callback) -> Button {

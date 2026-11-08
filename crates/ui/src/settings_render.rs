@@ -23,13 +23,15 @@ impl Render for SettingsView {
                 view.update(cx, |this, cx| this.remove_program(name, cx))
             })
         };
+        let browse_view = view.clone();
         let pick: Callback = Rc::new(move |name: &str, cx: &mut App| {
             view.update(cx, |this, cx| this.add_program(name, cx))
         });
+        let browse = move |cx: &mut App| browse_view.update(cx, |this, cx| this.browse_program(cx));
         let programs: Vec<String> = self.settings.excluded.iter().map(String::from).collect();
         let picker = self
             .picker_open
-            .then(|| program_picker(&self.pickable(), &pick, cx));
+            .then(|| program_picker(&self.pickable(), &pick, browse, cx));
 
         div()
             .id("settings")

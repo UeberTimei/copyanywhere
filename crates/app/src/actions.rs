@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use application::session::Session;
 use domain::settings::Settings;
-use infrastructure::{autostart, foreground, settings_file};
+use infrastructure::{autostart, file_dialog, foreground, settings_file};
 use ui::settings_window::SettingsActions;
 
 pub fn settings_actions(session: &Arc<Session>) -> SettingsActions {
@@ -13,6 +13,7 @@ pub fn settings_actions(session: &Arc<Session>) -> SettingsActions {
         enabled: session.is_enabled(),
         save: Rc::new(move |next| persist(&target, next)),
         running_programs: Arc::new(foreground::running_programs),
+        pick_program: Rc::new(file_dialog::pick_program),
     }
 }
 

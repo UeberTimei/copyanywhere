@@ -11,6 +11,8 @@ use ui::{anchor, settings_window, toast};
 
 use crate::actions::settings_actions;
 
+/// Lightness added to the Kit's dark palette.
+const LIFT: f32 = 0.05;
 const TICK: Duration = Duration::from_millis(16);
 
 pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
@@ -19,6 +21,10 @@ pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
         .run(move |cx: &mut App| {
             init(cx);
             Theme::change(ThemeMode::Dark, None, cx);
+            Theme::update(cx, |theme| {
+                theme.background.l += LIFT;
+                theme.group_box.l += LIFT;
+            });
             anchor::open(cx);
             let mut window: Option<AnyWindowHandle> = None;
             cx.spawn(async move |cx| {

@@ -1,6 +1,6 @@
 pub const ACCENT: u32 = 0x46c2a1;
 
 pub const WINDOW_WIDTH: f32 = 440.;
-pub const WINDOW_HEIGHT: f32 = 560.;
+pub const WINDOW_HEIGHT: f32 = 700.;
 pub const PICKER_MAX_HEIGHT: f32 = 220.;
 pub const DOT_SIZE: f32 = 8.;

@@ -1,8 +1,11 @@
 use std::rc::Rc;
+use std::time::Duration;
 
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::group_box::{GroupBox, GroupBoxVariants};
-use gpui_kit::{App, Div, Stateful, div, prelude::*, px};
+use gpui_kit::{
+    Animation, AnimationExt, App, IntoElement, div, ease_out_quint, prelude::*, px,
+};
 
 use crate::exclusion_list::Callback;
 use crate::text::muted;
@@ -12,7 +15,7 @@ pub fn program_picker(
     programs: &[String],
     on_pick: &Callback,
     cx: &App,
-) -> Stateful<Div> {
+) -> impl IntoElement + use<> {
     let group = if programs.is_empty() {
         GroupBox::new()
             .outline()
@@ -27,9 +30,20 @@ pub fn program_picker(
     };
     div()
         .id("program-picker")
+        .w_full()
         .max_h(px(theme::PICKER_MAX_HEIGHT))
         .overflow_y_scroll()
         .child(group)
+        .with_animation(
+            "program-picker-open",
+            Animation::new(Duration::from_millis(theme::PICKER_ANIMATION_MS))
+                .with_easing(ease_out_quint()),
+            |picker, progress| {
+                picker
+                    .max_h(px(theme::PICKER_MAX_HEIGHT * progress))
+                    .opacity(progress)
+            },
+        )
 }
 
 fn pick_button(index: usize, name: &str, on_pick: &Callback) -> Button {

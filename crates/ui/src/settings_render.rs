@@ -1,7 +1,8 @@
 use std::rc::Rc;
 
 use gpui_kit::component::ActiveTheme;
-use gpui_kit::component::button::Button;
+use gpui_kit::component::button::{Button, ButtonVariants};
+use gpui_kit::component::{Icon, IconName};
 use gpui_kit::component::group_box::{GroupBox, GroupBoxVariants};
 use gpui_kit::component::switch::Switch;
 use gpui_kit::{App, Context, IntoElement, Render, Window, div, prelude::*, rgb};
@@ -68,9 +69,9 @@ impl Render for SettingsView {
                     .flex_col()
                     .gap_2()
                     .child(muted("Auto-copy is skipped in these programs", cx))
-                    .child(exclusion_list(&programs, &remove, cx))
-                    .child(add_buttons(cx))
-                    .children(picker),
+                    .child(add_buttons(self.picker_open, cx))
+                    .children(picker)
+                    .child(exclusion_list(&programs, &remove, cx)),
             )
     }
 }
@@ -88,19 +89,32 @@ fn toggle_row(
         .on_click(cx.listener(move |this, _: &bool, _, cx| this.toggle_feature(feature, cx)))
 }
 
-fn add_buttons(cx: &Context<SettingsView>) -> impl IntoElement {
+fn add_buttons(picker_open: bool, cx: &Context<SettingsView>) -> impl IntoElement {
+    let (arrow, add) = if picker_open {
+        (IconName::ChevronDown, Button::new("add-program").success())
+    } else {
+        (IconName::ChevronRight, Button::new("add-program").outline())
+    };
     div()
+        .w_full()
         .flex()
         .gap_2()
         .child(
-            Button::new("add-program")
-                .outline()
-                .label("Add current program")
+            add.flex_1()
+                .child(
+                    div()
+                        .flex()
+                        .items_center()
+                        .gap_2()
+                        .child("Add current program")
+                        .child(Icon::new(arrow).size_4()),
+                )
                 .on_click(cx.listener(|this, _, _, cx| this.toggle_picker(cx))),
         )
         .child(
             Button::new("browse-program")
                 .outline()
+                .flex_1()
                 .label("Browse a program")
                 .on_click(cx.listener(|this, _, _, cx| this.browse_program(cx))),
         )

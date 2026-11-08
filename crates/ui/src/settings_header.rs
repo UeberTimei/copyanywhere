@@ -1,14 +1,14 @@
-use gpui_kit::{
-    ClickEvent, FontWeight, IntoElement, Window, WindowControlArea, div, prelude::*, px, rgb, rgba,
-};
+use gpui_kit::component::button::{Button, ButtonVariants};
+use gpui_kit::component::{ActiveTheme, IconName};
+use gpui_kit::{App, FontWeight, Hsla, IntoElement, WindowControlArea, div, prelude::*, px, rgb};
 
 use crate::theme;
 
-pub fn header(enabled: bool) -> impl IntoElement {
+pub fn header(enabled: bool, cx: &App) -> impl IntoElement {
     let (status, dot) = if enabled {
-        ("Auto-copy is on", theme::ACCENT)
+        ("Auto-copy is on", Hsla::from(rgb(theme::ACCENT)))
     } else {
-        ("Auto-copy is off", theme::TEXT_MUTED)
+        ("Auto-copy is off", cx.theme().muted_foreground)
     };
     div()
         .flex()
@@ -19,13 +19,12 @@ pub fn header(enabled: bool) -> impl IntoElement {
                 .flex_1()
                 .flex()
                 .items_center()
-                .gap(px(8.))
+                .gap_2()
                 .window_control_area(WindowControlArea::Drag)
-                .child(div().size(px(theme::DOT_SIZE)).rounded_full().bg(rgb(dot)))
+                .child(div().size(px(theme::DOT_SIZE)).rounded_full().bg(dot))
                 .child(
                     div()
-                        .text_size(px(20.))
-                        .line_height(px(24.))
+                        .text_xl()
                         .font_weight(FontWeight::MEDIUM)
                         .child(status),
                 ),
@@ -34,17 +33,9 @@ pub fn header(enabled: bool) -> impl IntoElement {
 }
 
 fn close_button() -> impl IntoElement {
-    div()
-        .id("close")
-        .size(px(28.))
-        .flex()
-        .items_center()
-        .justify_center()
-        .rounded(px(theme::RADIUS_CONTROL))
-        .text_size(px(18.))
-        .text_color(rgb(theme::TEXT_SECONDARY))
-        .cursor_pointer()
-        .hover(|style| style.bg(rgba(theme::HAIRLINE)).text_color(rgb(theme::TEXT)))
-        .child("×")
-        .on_click(|_: &ClickEvent, window: &mut Window, _| window.remove_window())
+    Button::new("close")
+        .ghost()
+        .compact()
+        .icon(IconName::Close)
+        .on_click(|_, window, _| window.remove_window())
 }

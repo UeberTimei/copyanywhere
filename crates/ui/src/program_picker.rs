@@ -1,43 +1,38 @@
 use std::rc::Rc;
 
-use gpui_kit::{Div, IntoElement, Stateful, div, prelude::*, px, rgb, rgba};
+use gpui_kit::component::button::{Button, ButtonVariants};
+use gpui_kit::component::group_box::{GroupBox, GroupBoxVariants};
+use gpui_kit::{App, Div, Stateful, div, prelude::*, px};
 
-use crate::card::muted_text;
-use crate::exclusion_list::{Callback, program_row};
+use crate::exclusion_list::Callback;
+use crate::text::muted;
 use crate::theme;
 
-pub fn program_picker(programs: &[String], on_pick: &Callback) -> Stateful<Div> {
-    let list = div()
+pub fn program_picker(programs: &[String], on_pick: &Callback, cx: &App) -> Stateful<Div> {
+    let group = if programs.is_empty() {
+        GroupBox::new()
+            .outline()
+            .child(muted("No running programs to add", cx))
+    } else {
+        programs
+            .iter()
+            .enumerate()
+            .fold(GroupBox::new().outline(), |group, (index, name)| {
+                group.child(pick_button(index, name, on_pick))
+            })
+    };
+    div()
         .id("program-picker")
-        .flex()
-        .flex_col()
-        .p(px(theme::CARD_PADDING))
-        .rounded(px(theme::RADIUS_CARD))
-        .bg(rgb(theme::RAISED_BG))
-        .border_1()
-        .border_color(rgba(theme::HAIRLINE))
-        .max_h(px(
-            theme::PROGRAM_ROW_HEIGHT * theme::PROGRAM_LIST_ROWS + 2. * theme::CARD_PADDING
-        ))
-        .overflow_y_scroll();
-    if programs.is_empty() {
-        return list.child(muted_text("No running programs to add"));
-    }
-    programs
-        .iter()
-        .enumerate()
-        .fold(list, |list, (index, name)| {
-            list.child(pick_row(index, name, on_pick))
-        })
+        .max_h(px(theme::PICKER_MAX_HEIGHT))
+        .overflow_y_scroll()
+        .child(group)
 }
 
-fn pick_row(index: usize, name: &str, on_pick: &Callback) -> impl IntoElement {
-    let row = program_row(name);
-    let name = name.to_owned();
+fn pick_button(index: usize, name: &str, on_pick: &Callback) -> Button {
+    let label = name.to_owned();
     let on_pick = Rc::clone(on_pick);
-    div()
-        .id(("pick", index))
-        .cursor_pointer()
-        .on_click(move |_, _, cx| on_pick(&name, cx))
-        .child(row)
+    Button::new(("pick", index))
+        .ghost()
+        .label(label.clone())
+        .on_click(move |_, _, cx| on_pick(&label, cx))
 }

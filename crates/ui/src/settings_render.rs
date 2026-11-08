@@ -1,17 +1,18 @@
 use std::rc::Rc;
 
-use gpui_kit::{
-    App, ClickEvent, Context, IntoElement, Render, Window, div, prelude::*, px, rgb, rgba,
-};
+use gpui_kit::component::ActiveTheme;
+use gpui_kit::component::button::Button;
+use gpui_kit::component::group_box::{GroupBox, GroupBoxVariants};
+use gpui_kit::component::switch::Switch;
+use gpui_kit::{App, Context, IntoElement, Render, Window, div, prelude::*, rgb};
 
-use crate::card::{card, section};
-use crate::exclusion_list::{Callback, exclusion_card};
+use crate::exclusion_list::{Callback, exclusion_list};
 use crate::program_picker::program_picker;
 use crate::settings_header::header;
 use crate::settings_logic::{self, Feature};
 use crate::settings_window::SettingsView;
+use crate::text::muted;
 use crate::theme;
-use crate::toggle::Toggle;
 
 impl Render for SettingsView {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
@@ -28,100 +29,68 @@ impl Render for SettingsView {
         let programs: Vec<String> = self.settings.excluded.iter().map(String::from).collect();
         let picker = self
             .picker_open
-            .then(|| program_picker(&self.pickable(), &pick));
+            .then(|| program_picker(&self.pickable(), &pick, cx));
 
         div()
             .id("settings")
             .size_full()
             .flex()
             .flex_col()
-            .gap(px(theme::CARD_GAP))
-            .p(px(theme::WINDOW_PADDING))
-            .bg(rgb(theme::WINDOW_BG))
-            .text_color(rgb(theme::TEXT))
-            .font_family(theme::FONT_FAMILY)
+            .gap_4()
+            .p_6()
+            .bg(cx.theme().background)
+            .text_color(cx.theme().foreground)
             .border_1()
-            .border_color(rgba(theme::HAIRLINE))
+            .border_color(cx.theme().border)
             .overflow_y_scroll()
-            .child(header(self.enabled))
-            .child(section(
-                "General",
-                card().child(toggle_row(
-                    "Launch with Windows",
-                    settings_logic::is_on(&self.settings, Feature::LaunchAtLogin),
-                    Feature::LaunchAtLogin,
-                    cx,
-                )),
-            ))
-            .child(section(
-                "Feedback",
-                card()
-                    .child(toggle_row(
-                        "Play sound",
-                        settings_logic::is_on(&self.settings, Feature::Sound),
-                        Feature::Sound,
-                        cx,
-                    ))
+            .child(header(self.enabled, cx))
+            .child(GroupBox::new().fill().title("General").child(toggle_row(
+                "Launch with Windows",
+                Feature::LaunchAtLogin,
+                self,
+                cx,
+            )))
+            .child(
+                GroupBox::new()
+                    .fill()
+                    .title("Feedback")
+                    .child(toggle_row("Play sound", Feature::Sound, self, cx))
                     .child(toggle_row(
                         "Show notification",
-                        settings_logic::is_on(&self.settings, Feature::Notification),
                         Feature::Notification,
+                        self,
                         cx,
                     )),
-            ))
-            .child(section(
-                "Excluded programs",
+            )
+            .child(
                 div()
                     .flex()
                     .flex_col()
-                    .gap(px(theme::LABEL_GAP))
-                    .child(crate::card::muted_text(
-                        "Auto-copy is skipped in these programs",
-                    ))
-                    .child(exclusion_card(&programs, &remove))
+                    .gap_2()
+                    .child(muted("Auto-copy is skipped in these programs", cx))
+                    .child(exclusion_list(&programs, &remove, cx))
                     .child(add_button(cx))
                     .children(picker),
-            ))
+            )
     }
 }
 
 fn toggle_row(
     label: &'static str,
-    on: bool,
     feature: Feature,
+    view: &SettingsView,
     cx: &Context<SettingsView>,
 ) -> impl IntoElement {
-    let toggle = Toggle::new(
-        label,
-        on,
-        cx.listener(move |this, _: &ClickEvent, _, cx| this.toggle_feature(feature, cx)),
-    );
-    div()
-        .h(px(theme::ROW_HEIGHT))
-        .px(px(12.))
-        .flex()
-        .items_center()
-        .justify_between()
-        .rounded(px(theme::RADIUS_CONTROL))
-        .text_size(px(14.))
-        .line_height(px(20.))
-        .child(label)
-        .child(toggle)
+    Switch::new(label)
+        .label(label)
+        .checked(settings_logic::is_on(&view.settings, feature))
+        .color(rgb(theme::ACCENT))
+        .on_click(cx.listener(move |this, _: &bool, _, cx| this.toggle_feature(feature, cx)))
 }
 
 fn add_button(cx: &Context<SettingsView>) -> impl IntoElement {
-    div()
-        .id("add-program")
-        .h(px(32.))
-        .px(px(12.))
-        .flex()
-        .items_center()
-        .rounded(px(theme::RADIUS_CONTROL))
-        .bg(rgb(theme::RAISED_BG))
-        .border_1()
-        .border_color(rgba(theme::HAIRLINE))
-        .text_size(px(14.))
-        .cursor_pointer()
-        .child("Add program")
-        .on_click(cx.listener(|this, _: &ClickEvent, _, cx| this.toggle_picker(cx)))
+    Button::new("add-program")
+        .outline()
+        .label("Add program")
+        .on_click(cx.listener(|this, _, _, cx| this.toggle_picker(cx)))
 }

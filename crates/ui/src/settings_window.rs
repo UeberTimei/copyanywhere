@@ -3,7 +3,8 @@ use std::sync::Arc;
 
 use domain::settings::Settings;
 use gpui_kit::{
-    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, point, prelude::*, px, size,
+    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, open_window, point,
+    prelude::*, px, size,
 };
 
 use crate::native_window::{Spot, handle_of, show_at};
@@ -39,9 +40,8 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
         show: true,
         ..Default::default()
     };
-    let handle = cx
-        .open_window(options, |_, cx| cx.new(|_| SettingsView::new(actions)))
-        .ok()?;
+    let (handle, _) =
+        open_window(options, cx, |_, cx| cx.new(|_| SettingsView::new(actions))).ok()?;
     let spot = Spot {
         at,
         logical_size,
@@ -54,7 +54,7 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
         }
     })
     .detach();
-    Some(handle.into())
+    Some(handle)
 }
 
 impl SettingsView {

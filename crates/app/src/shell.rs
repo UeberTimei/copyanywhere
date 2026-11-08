@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use std::sync::mpsc::Receiver;
+use std::sync::mpsc::{self, Receiver};
 use std::time::Duration;
 
 use application::session::Session;
@@ -7,7 +7,7 @@ use gpui_kit::component::theme::{Theme, ThemeMode};
 use gpui_kit::{AnyWindowHandle, App, application, assets, init};
 use infrastructure::mouse_hook;
 use ui::tray::{Tray, TrayCommand};
-use ui::{anchor, settings_window, toast};
+use ui::{anchor, settings_window, toast, tray_menu};
 
 use crate::actions::settings_actions;
 
@@ -25,7 +25,11 @@ pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
                 theme.background.l += LIFT;
                 theme.group_box.l += LIFT;
             });
-            anchor::open(cx);
+            let anchor = anchor::open(cx);
+            let (commands, menu_commands) = mpsc::channel();
+            tray_menu::on_command(cx, move |command| {
+                commands.send(command).ok();
+            });
             let mut window: Option<AnyWindowHandle> = None;
             cx.spawn(async move |cx| {
                 loop {
@@ -34,7 +38,16 @@ pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
                         while let Ok(at) = toasts.try_recv() {
                             toast::show(cx, at);
                         }
-                        while let Some(command) = tray.poll() {
+                        while let Some(command) =
+                            tray.poll().or_else(|| menu_commands.try_recv().ok())
+                        {
+                            if command == TrayCommand::Menu {
+                                if let Some(anchor) = anchor {
+                                    let at = mouse_hook::cursor_position();
+                                    tray_menu::show(cx, anchor, at, session.is_enabled());
+                                }
+                                continue;
+                            }
                             handle(command, &session, &tray, &mut window, cx);
                         }
                     });
@@ -57,6 +70,7 @@ fn handle(
         }
         TrayCommand::Settings => open_settings(session, window, cx),
         TrayCommand::Exit => cx.quit(),
+        TrayCommand::Menu => {}
     }
 }
 

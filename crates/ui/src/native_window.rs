@@ -2,7 +2,7 @@ use gpui_kit::Window;
 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 use windows::Win32::Foundation::{HWND, POINT};
 use windows::Win32::Graphics::Gdi::{
-    GetMonitorInfoW, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromPoint,
+    ClientToScreen, GetMonitorInfoW, MONITOR_DEFAULTTONEAREST, MONITORINFO, MonitorFromPoint,
 };
 use windows::Win32::UI::HiDpi::GetDpiForWindow;
 use windows::Win32::UI::WindowsAndMessaging::{
@@ -59,6 +59,13 @@ pub fn handle_of(window: &Window) -> Option<HWND> {
         RawWindowHandle::Win32(handle) => Some(HWND(handle.hwnd.get() as *mut _)),
         _ => None,
     }
+}
+
+/// Screen position of the window's client origin, which native popups measure from.
+pub fn client_origin(hwnd: HWND) -> (i32, i32) {
+    let mut origin = POINT::default();
+    let _ = unsafe { ClientToScreen(hwnd, &mut origin) };
+    (origin.x, origin.y)
 }
 
 fn monitor_area(at: (i32, i32)) -> Area {

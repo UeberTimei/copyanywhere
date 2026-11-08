@@ -13,3 +13,4 @@ pub mod theme;
 pub mod toast;
 pub mod tray;
 pub mod tray_icon_image;
+pub mod tray_menu;

@@ -1,6 +1,6 @@
 use gpui_kit::component::button::{Button, ButtonVariants};
 use gpui_kit::component::{ActiveTheme, IconName};
-use gpui_kit::{App, FontWeight, Hsla, IntoElement, WindowControlArea, div, prelude::*, px, rgb};
+use gpui_kit::{App, FontWeight, Hsla, IntoElement, div, prelude::*, px, rgb};
 
 use crate::theme;
 
@@ -20,7 +20,6 @@ pub fn header(enabled: bool, cx: &App) -> impl IntoElement {
                 .flex()
                 .items_center()
                 .gap_2()
-                .window_control_area(WindowControlArea::Drag)
                 .child(div().size(px(theme::DOT_SIZE)).rounded_full().bg(dot))
                 .child(
                     div()

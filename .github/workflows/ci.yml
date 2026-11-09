@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo xtask ci
+
+  # Publishes a GitHub release with the exe whenever the version in
+  # crates/app/Cargo.toml has no release yet. Bump it to ship a new one.
+  release:
+    needs: ci
+    if: github.event_name == 'push'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - name: Read version
+        id: version
+        shell: bash
+        run: echo "tag=v$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[] | select(.name=="copyanywhere") | .version')" >> "$GITHUB_OUTPUT"
+      - name: Check for an existing release
+        id: exists
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build release exe
+        if: steps.exists.outputs.found == 'false'
+        run: cargo build --release -p copyanywhere
+      - name: Publish release
+        if: steps.exists.outputs.found == 'false'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp target/release/copyanywhere.exe CopyAnywhere.exe
+          gh release create "${{ steps.version.outputs.tag }}" CopyAnywhere.exe \
+            --target "${{ github.sha }}" \
+            --title "CopyAnywhere ${{ steps.version.outputs.tag }}" \
+            --generate-notes

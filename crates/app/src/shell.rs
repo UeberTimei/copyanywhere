@@ -5,7 +5,7 @@ use std::time::Duration;
 use application::session::Session;
 use gpui_kit::component::theme::{Theme, ThemeMode};
 use gpui_kit::{AnyWindowHandle, App, QuitMode, application, assets, init};
-use infrastructure::mouse_hook;
+use infrastructure::{mouse_hook, working_set};
 use ui::tray::{Tray, TrayCommand};
 use ui::{anchor, settings_window, toast, tray_menu};
 
@@ -17,6 +17,8 @@ use crate::actions::{settings_actions, update_actions};
 /// Lightness added to the Kit's dark palette.
 const LIFT: f32 = 0.05;
 const TICK: Duration = Duration::from_millis(16);
+/// Ticks without a window (about 5 s) before idle memory is handed back to Windows.
+const TRIM_AFTER: u32 = 300;
 
 pub fn run(
     session: Arc<Session>,
@@ -42,6 +44,7 @@ pub fn run(
             let mut window: Option<AnyWindowHandle> = None;
             // opened by the first right-click, since only the native menu needs it
             let mut anchor: Option<AnyWindowHandle> = None;
+            let mut quiet = 0u32;
             cx.spawn(async move |cx| {
                 loop {
                     cx.background_executor().timer(TICK).await;
@@ -70,6 +73,11 @@ pub fn run(
                                 continue;
                             }
                             handle(command, &session, &tray, &mut window, cx);
+                        }
+                        let shown = cx.windows().len() > usize::from(anchor.is_some());
+                        quiet = if shown { 0 } else { quiet.saturating_add(1) };
+                        if quiet == TRIM_AFTER {
+                            working_set::trim();
                         }
                     });
                 }

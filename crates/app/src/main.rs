@@ -10,7 +10,8 @@ use std::sync::mpsc;
 
 use application::auto_copy::AutoCopy;
 use application::session::Session;
-use infrastructure::settings_file;
+use domain::update::is_offered;
+use infrastructure::{release_feed, self_update, settings_file};
 use ui::tray::Tray;
 
 fn main() -> anyhow::Result<()> {
@@ -24,7 +25,20 @@ fn main() -> anyhow::Result<()> {
         Arc::clone(&session),
     );
     pipeline::start(auto_copy);
+    self_update::remove_leftover();
+    let (releases, updates) = mpsc::channel();
+    let settings = session.settings();
+    if settings.check_updates {
+        std::thread::spawn(move || {
+            let offered = release_feed::latest()
+                .ok()
+                .filter(|r| is_offered(r, env!("CARGO_PKG_VERSION"), &settings.skipped_version));
+            if let Some(release) = offered {
+                releases.send(release).ok();
+            }
+        });
+    }
     let tray = Tray::new(session.is_enabled())?;
-    shell::run(session, tray, toast_requests);
+    shell::run(session, tray, toast_requests, updates);
     Ok(())
 }

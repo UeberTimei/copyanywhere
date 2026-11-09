@@ -7,6 +7,7 @@ use domain::settings::Settings;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Feature {
     LaunchAtLogin,
+    CheckUpdates,
     Sound,
     Notification,
 }
@@ -14,6 +15,7 @@ pub enum Feature {
 pub fn is_on(settings: &Settings, feature: Feature) -> bool {
     match feature {
         Feature::LaunchAtLogin => settings.launch_at_login,
+        Feature::CheckUpdates => settings.check_updates,
         Feature::Sound => settings.sound_enabled,
         Feature::Notification => settings.toast_enabled,
     }
@@ -22,6 +24,7 @@ pub fn is_on(settings: &Settings, feature: Feature) -> bool {
 pub fn apply_toggle(settings: &mut Settings, feature: Feature) {
     let flag = match feature {
         Feature::LaunchAtLogin => &mut settings.launch_at_login,
+        Feature::CheckUpdates => &mut settings.check_updates,
         Feature::Sound => &mut settings.sound_enabled,
         Feature::Notification => &mut settings.toast_enabled,
     };

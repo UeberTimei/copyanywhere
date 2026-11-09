@@ -52,12 +52,23 @@ impl Render for SettingsView {
             .border_color(cx.theme().border)
             .overflow_y_scroll()
             .child(header(self.enabled, cx))
-            .child(GroupBox::new().fill().title("General").child(toggle_row(
-                "Launch with Windows",
-                Feature::LaunchAtLogin,
-                self,
-                cx,
-            )))
+            .child(
+                GroupBox::new()
+                    .fill()
+                    .title("General")
+                    .child(toggle_row(
+                        "Launch with Windows",
+                        Feature::LaunchAtLogin,
+                        self,
+                        cx,
+                    ))
+                    .child(toggle_row(
+                        "Check for updates on launch",
+                        Feature::CheckUpdates,
+                        self,
+                        cx,
+                    )),
+            )
             .child(
                 GroupBox::new()
                     .fill()

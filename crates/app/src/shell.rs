@@ -9,13 +9,21 @@ use infrastructure::mouse_hook;
 use ui::tray::{Tray, TrayCommand};
 use ui::{anchor, settings_window, toast, tray_menu};
 
-use crate::actions::settings_actions;
+use domain::update::Release;
+use ui::update_window;
+
+use crate::actions::{settings_actions, update_actions};
 
 /// Lightness added to the Kit's dark palette.
 const LIFT: f32 = 0.05;
 const TICK: Duration = Duration::from_millis(16);
 
-pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
+pub fn run(
+    session: Arc<Session>,
+    tray: Tray,
+    toasts: Receiver<(i32, i32)>,
+    updates: Receiver<Release>,
+) {
     application()
         .with_assets(assets::Assets)
         .run(move |cx: &mut App| {
@@ -37,6 +45,13 @@ pub fn run(session: Arc<Session>, tray: Tray, toasts: Receiver<(i32, i32)>) {
                     cx.update(|cx| {
                         while let Ok(at) = toasts.try_recv() {
                             toast::show(cx, at);
+                        }
+                        while let Ok(release) = updates.try_recv() {
+                            update_window::open(
+                                cx,
+                                update_actions(&session, release),
+                                mouse_hook::cursor_position(),
+                            );
                         }
                         while let Some(command) =
                             tray.poll().or_else(|| menu_commands.try_recv().ok())

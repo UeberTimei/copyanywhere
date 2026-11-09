@@ -9,6 +9,8 @@ fn apply_toggle_flips_each_feature() {
     let mut settings = Settings::default();
     apply_toggle(&mut settings, Feature::LaunchAtLogin);
     assert!(is_on(&settings, Feature::LaunchAtLogin));
+    apply_toggle(&mut settings, Feature::CheckUpdates);
+    assert!(!is_on(&settings, Feature::CheckUpdates));
     apply_toggle(&mut settings, Feature::Sound);
     assert!(!is_on(&settings, Feature::Sound));
     apply_toggle(&mut settings, Feature::Notification);

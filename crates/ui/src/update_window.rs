@@ -8,7 +8,7 @@ use gpui_kit::{
 };
 
 use crate::native_window::{Spot, handle_of, show_at};
-use crate::placement::centered_above;
+use crate::placement::centered;
 use crate::theme;
 
 pub struct UpdateActions {
@@ -48,7 +48,7 @@ pub fn open(cx: &mut App, actions: UpdateActions, at: (i32, i32)) -> Option<AnyW
     let spot = Spot {
         at,
         logical_size,
-        origin: centered_above,
+        origin: centered,
         activate: true,
     };
     cx.spawn(async move |cx| {

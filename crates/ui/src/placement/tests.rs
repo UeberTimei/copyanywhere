@@ -1,4 +1,4 @@
-use super::{Area, above_right, centered_above, pixel_size};
+use super::{Area, above_right, centered, centered_above, pixel_size};
 
 const SCREEN: Area = Area {
     left: 0,
@@ -51,4 +51,9 @@ fn window_stays_on_screen_near_the_right_edge() {
 fn pixel_size_scales_with_dpi() {
     assert_eq!(pixel_size((96.0, 32.0), 96), (96, 32));
     assert_eq!(pixel_size((96.0, 32.0), 144), (144, 48));
+}
+
+#[test]
+fn centered_window_sits_in_the_middle_of_the_screen() {
+    assert_eq!(centered((10, 10), (440, 380), SCREEN), (740, 330));
 }

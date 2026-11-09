@@ -11,8 +11,11 @@ use crate::http;
 /// Replaces the running exe with the release's and starts it; the caller must exit afterwards.
 pub fn install(release: &Release) -> Result<()> {
     let exe = std::env::current_exe()?;
+    let Some(checksum_url) = &release.checksum_url else {
+        bail!("this release has no checksum to verify the download");
+    };
     let bytes = http::get_bytes(&release.exe_url)?;
-    if !matches(&bytes, &http::get_text(&release.checksum_url)?) {
+    if !matches(&bytes, &http::get_text(checksum_url)?) {
         bail!("the download does not match its checksum");
     }
     let (fresh, old) = (beside(&exe, "new"), beside(&exe, "old"));

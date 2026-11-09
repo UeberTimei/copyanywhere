@@ -20,7 +20,7 @@ fn parse(release: &Value) -> Option<Release> {
             .trim()
             .to_owned(),
         exe_url: asset_url(release, EXE_ASSET)?,
-        checksum_url: asset_url(release, CHECKSUM_ASSET)?,
+        checksum_url: asset_url(release, CHECKSUM_ASSET),
     })
 }
 

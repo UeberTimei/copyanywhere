@@ -3,7 +3,7 @@ pub struct Release {
     pub version: String,
     pub notes: String,
     pub exe_url: String,
-    pub checksum_url: String,
+    pub checksum_url: Option<String>,
 }
 
 /// Whether the user should be offered `release`: it is newer than `current` and not skipped.

@@ -5,7 +5,7 @@ fn release(version: &str) -> Release {
         version: version.into(),
         notes: String::new(),
         exe_url: String::new(),
-        checksum_url: String::new(),
+        checksum_url: None,
     }
 }
 

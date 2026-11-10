@@ -1,3 +1,4 @@
+mod bump;
 mod cargo;
 
 use std::process::ExitCode;
@@ -9,13 +10,13 @@ const CRATES: [&str; 5] = [
     "ui",
     "copyanywhere",
 ];
-const USAGE: &str = "usage: cargo xtask <build|test|check|lint|fmt|run|update-example|ci> [crate]\ncrates: domain application infrastructure ui copyanywhere (omit for all)";
+const USAGE: &str = "usage: cargo xtask <build|test|check|lint|fmt|run|update-example|bump|ci> [crate|version]\ncrates: domain application infrastructure ui copyanywhere (omit for all)";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     let task = args.first().map(String::as_str);
     let package = args.get(1).map(String::as_str);
-    if package.is_some_and(|name| !CRATES.contains(&name)) {
+    if task != Some("bump") && package.is_some_and(|name| !CRATES.contains(&name)) {
         eprintln!("{USAGE}");
         return ExitCode::FAILURE;
     }
@@ -27,6 +28,7 @@ fn main() -> ExitCode {
         Some("fmt") => cargo::run(&["fmt", "--all"]),
         Some("run") => cargo::run(&["run", "-p", "copyanywhere"]),
         Some("update-example") => cargo::run(&["run", "-p", "ui", "--example", "update_window"]),
+        Some("bump") => bump::run(args.get(1).map(String::as_str)),
         Some("ci") => ci(),
         _ => {
             eprintln!("{USAGE}");

@@ -20,6 +20,7 @@ pub fn install(release: &Release) -> Result<()> {
     }
     let (fresh, old) = (beside(&exe, "new"), beside(&exe, "old"));
     fs::write(&fresh, bytes)?;
+    make_executable(&fresh)?;
     // Windows lets a running exe be renamed, never overwritten.
     fs::remove_file(&old).ok();
     fs::rename(&exe, &old)?;
@@ -31,6 +32,20 @@ pub fn install(release: &Release) -> Result<()> {
     Ok(())
 }
 
+#[cfg(unix)]
+fn make_executable(path: &Path) -> Result<()> {
+    use std::os::unix::fs::PermissionsExt;
+    Ok(fs::set_permissions(
+        path,
+        fs::Permissions::from_mode(0o755),
+    )?)
+}
+
+#[cfg(not(unix))]
+fn make_executable(_: &Path) -> Result<()> {
+    Ok(())
+}
+
 /// Deletes the exe an earlier update left behind.
 pub fn remove_leftover() {
     if let Ok(exe) = std::env::current_exe() {
@@ -38,8 +53,10 @@ pub fn remove_leftover() {
     }
 }
 
-fn beside(exe: &Path, extension: &str) -> PathBuf {
-    exe.with_extension(format!("exe.{extension}"))
+fn beside(exe: &Path, suffix: &str) -> PathBuf {
+    let mut name = exe.file_name().unwrap_or_default().to_owned();
+    name.push(format!(".{suffix}"));
+    exe.with_file_name(name)
 }
 
 /// `checksum` is `sha256sum` output: the hex digest, then the file name.

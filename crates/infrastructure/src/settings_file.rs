@@ -12,11 +12,33 @@ pub fn save(settings: &Settings) -> anyhow::Result<()> {
 }
 
 fn file_path() -> PathBuf {
+    config_dir().join("CopyAnywhere").join("settings.json")
+}
+
+#[cfg(windows)]
+pub(crate) fn config_dir() -> PathBuf {
     std::env::var_os("APPDATA")
         .map(PathBuf::from)
         .unwrap_or_default()
-        .join("CopyAnywhere")
-        .join("settings.json")
+}
+
+#[cfg(target_os = "macos")]
+pub(crate) fn config_dir() -> PathBuf {
+    home().join("Library").join("Application Support")
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+pub(crate) fn config_dir() -> PathBuf {
+    std::env::var_os("XDG_CONFIG_HOME")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| home().join(".config"))
+}
+
+#[cfg(unix)]
+pub(crate) fn home() -> PathBuf {
+    std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .unwrap_or_default()
 }
 
 fn load_from(path: &Path) -> Settings {

@@ -6,7 +6,7 @@ use windows::core::{PCWSTR, PWSTR};
 
 use domain::program::Program;
 
-use crate::program_title::describe;
+use super::program_title::describe;
 
 /// Asks the user for an executable and returns it, or `None` if cancelled.
 pub fn pick_program() -> Option<Program> {

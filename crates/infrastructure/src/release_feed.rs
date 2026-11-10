@@ -3,7 +3,7 @@ use domain::update::Release;
 use serde_json::Value;
 
 const LATEST: &str = "https://api.github.com/repos/UeberTimei/copyanywhere/releases/latest";
-// Release assets are named per architecture; keep in sync with the release job in ci.yml.
+// Release assets are named per OS and architecture; keep in sync with the release job in ci.yml.
 #[cfg(target_arch = "x86_64")]
 const ARCH: &str = "x64";
 #[cfg(target_arch = "x86")]
@@ -11,13 +11,28 @@ const ARCH: &str = "x86";
 #[cfg(target_arch = "aarch64")]
 const ARCH: &str = "arm64";
 
+#[cfg(windows)]
+fn asset_name() -> String {
+    format!("CopyAnywhere-{ARCH}.exe")
+}
+
+#[cfg(target_os = "macos")]
+fn asset_name() -> String {
+    format!("CopyAnywhere-macos-{ARCH}")
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+fn asset_name() -> String {
+    format!("CopyAnywhere-linux-{ARCH}")
+}
+
 pub fn latest() -> Result<Release> {
     let body = crate::http::get_text(LATEST)?;
     parse(&serde_json::from_str(&body)?).ok_or_else(|| anyhow!("unexpected release payload"))
 }
 
 fn parse(release: &Value) -> Option<Release> {
-    let exe_asset = format!("CopyAnywhere-{ARCH}.exe");
+    let exe_asset = asset_name();
     Some(Release {
         version: release["tag_name"].as_str()?.to_owned(),
         notes: release["body"]

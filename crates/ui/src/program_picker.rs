@@ -32,6 +32,8 @@ pub fn program_picker(
         .id("program-picker")
         .w_full()
         .overflow_y_scroll()
+        // Runs after the built-in scroll, so the window behind never scrolls, even at the list's edge.
+        .on_scroll(|_, _, cx| cx.stop_propagation())
         .child(group)
         .with_animation(
             reveal.id("program-picker-reveal"),

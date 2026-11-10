@@ -11,7 +11,7 @@ impl Render for Anchor {
     }
 }
 
-// GPUI quits when its last window closes, so one hidden window keeps the tray app alive
+// The native tray menu needs a window to be placed against and to dispatch its action to
 pub fn open(cx: &mut App) -> Option<AnyWindowHandle> {
     let options = WindowOptions {
         window_bounds: Some(WindowBounds::Windowed(Bounds::new(

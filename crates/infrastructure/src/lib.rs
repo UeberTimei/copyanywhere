@@ -10,3 +10,4 @@ pub mod release_feed;
 pub mod self_update;
 pub mod settings_file;
 pub mod sound;
+pub mod working_set;

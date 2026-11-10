@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use application::session::Session;
 use gpui_kit::component::theme::{Theme, ThemeMode};
-use gpui_kit::{AnyWindowHandle, App, application, assets, init};
-use infrastructure::mouse_hook;
+use gpui_kit::{AnyWindowHandle, App, QuitMode, application, assets, init};
+use infrastructure::{mouse_hook, working_set};
 use ui::tray::{Tray, TrayCommand};
 use ui::{anchor, settings_window, toast, tray_menu};
 
@@ -17,6 +17,8 @@ use crate::actions::{settings_actions, update_actions};
 /// Lightness added to the Kit's dark palette.
 const LIFT: f32 = 0.05;
 const TICK: Duration = Duration::from_millis(16);
+/// Ticks without a window (about 5 s) before idle memory is handed back to Windows.
+const TRIM_AFTER: u32 = 300;
 
 pub fn run(
     session: Arc<Session>,
@@ -26,6 +28,8 @@ pub fn run(
 ) {
     application()
         .with_assets(assets::Assets)
+        // the tray, not a window, keeps the app alive
+        .with_quit_mode(QuitMode::Explicit)
         .run(move |cx: &mut App| {
             init(cx);
             Theme::change(ThemeMode::Dark, None, cx);
@@ -33,12 +37,14 @@ pub fn run(
                 theme.background.l += LIFT;
                 theme.group_box.l += LIFT;
             });
-            let anchor = anchor::open(cx);
             let (commands, menu_commands) = mpsc::channel();
             tray_menu::on_command(cx, move |command| {
                 commands.send(command).ok();
             });
             let mut window: Option<AnyWindowHandle> = None;
+            // opened by the first right-click, since only the native menu needs it
+            let mut anchor: Option<AnyWindowHandle> = None;
+            let mut quiet = 0u32;
             cx.spawn(async move |cx| {
                 loop {
                     cx.background_executor().timer(TICK).await;
@@ -57,6 +63,9 @@ pub fn run(
                             tray.poll().or_else(|| menu_commands.try_recv().ok())
                         {
                             if command == TrayCommand::Menu {
+                                if anchor.is_none() {
+                                    anchor = anchor::open(cx);
+                                }
                                 if let Some(anchor) = anchor {
                                     let at = mouse_hook::cursor_position();
                                     tray_menu::show(cx, anchor, at, session.is_enabled());
@@ -64,6 +73,11 @@ pub fn run(
                                 continue;
                             }
                             handle(command, &session, &tray, &mut window, cx);
+                        }
+                        let shown = cx.windows().len() > usize::from(anchor.is_some());
+                        quiet = if shown { 0 } else { quiet.saturating_add(1) };
+                        if quiet == TRIM_AFTER {
+                            working_set::trim();
                         }
                     });
                 }

@@ -13,6 +13,8 @@ pub mod theme;
 pub mod toast;
 pub mod tray;
 pub mod tray_icon_image;
+#[cfg(target_os = "linux")]
+mod tray_linux_menu;
 pub mod tray_menu;
 pub mod update_logic;
 pub mod update_render;

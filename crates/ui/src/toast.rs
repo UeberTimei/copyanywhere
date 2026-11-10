@@ -7,10 +7,10 @@ use std::time::{Duration, Instant};
 
 use gpui_kit::{
     App, AppContext, Bounds, WindowBackgroundAppearance, WindowBounds, WindowKind, WindowOptions,
-    point, px, size,
+    px, size,
 };
 
-use crate::native_window::{Spot, handle_of, show_at};
+use crate::native_window::{Spot, handle_of, opening_origin, show_at};
 use crate::placement::above_right;
 use view::ToastView;
 
@@ -18,10 +18,16 @@ const FRAME: Duration = Duration::from_millis(16);
 const TOAST_SIZE: (f32, f32) = (96.0, 32.0);
 
 pub fn show(cx: &mut App, at: (i32, i32)) {
-    // GPUI opens it at the top-left of the primary monitor, fully transparent until faded in,
+    // On Windows GPUI opens it at the top-left of the primary monitor, fully transparent until faded in,
     // and show_at then moves it next to the cursor
+    let spot = Spot {
+        at,
+        logical_size: TOAST_SIZE,
+        origin: above_right,
+        activate: false,
+    };
     let bounds = Bounds::new(
-        point(px(0.), px(0.)),
+        opening_origin(cx, &spot),
         size(px(TOAST_SIZE.0), px(TOAST_SIZE.1)),
     );
     let options = WindowOptions {
@@ -37,12 +43,6 @@ pub fn show(cx: &mut App, at: (i32, i32)) {
     };
     let Ok(handle) = cx.open_window(options, |_, cx| cx.new(|_| ToastView::new())) else {
         return;
-    };
-    let spot = Spot {
-        at,
-        logical_size: TOAST_SIZE,
-        origin: above_right,
-        activate: false,
     };
     cx.spawn(async move |cx| {
         if let Ok(Some(hwnd)) = handle.update(cx, |_, window, _| handle_of(window)) {

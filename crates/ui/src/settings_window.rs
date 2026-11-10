@@ -4,11 +4,11 @@ use std::sync::Arc;
 use domain::program::Program;
 use domain::settings::Settings;
 use gpui_kit::{
-    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, open_window, point,
-    prelude::*, px, size,
+    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, open_window, prelude::*,
+    px, size,
 };
 
-use crate::native_window::{Spot, handle_of, show_at};
+use crate::native_window::{Spot, handle_of, opening_origin, show_at};
 use crate::placement::centered_above;
 use crate::settings_logic::{self, Feature};
 use crate::theme;
@@ -35,8 +35,14 @@ pub struct SettingsView {
 
 pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<AnyWindowHandle> {
     let logical_size = (theme::WINDOW_WIDTH, theme::WINDOW_HEIGHT);
+    let spot = Spot {
+        at,
+        logical_size,
+        origin: centered_above,
+        activate: true,
+    };
     let bounds = Bounds::new(
-        point(px(0.), px(0.)),
+        opening_origin(cx, &spot),
         size(px(logical_size.0), px(logical_size.1)),
     );
     let options = WindowOptions {
@@ -59,12 +65,6 @@ pub fn open(cx: &mut App, actions: SettingsActions, at: (i32, i32)) -> Option<An
         })
     })
     .ok()?;
-    let spot = Spot {
-        at,
-        logical_size,
-        origin: centered_above,
-        activate: true,
-    };
     cx.spawn(async move |cx| {
         if let Ok(Some(hwnd)) = handle.update(cx, |_, window, _| handle_of(window)) {
             show_at(hwnd, &spot);

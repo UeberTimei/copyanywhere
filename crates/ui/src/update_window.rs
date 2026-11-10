@@ -3,11 +3,11 @@ use std::sync::Arc;
 
 use domain::update::Release;
 use gpui_kit::{
-    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, open_window, point,
-    prelude::*, px, size,
+    AnyWindowHandle, App, Bounds, Context, WindowBounds, WindowOptions, open_window, prelude::*,
+    px, size,
 };
 
-use crate::native_window::{Spot, handle_of, show_at};
+use crate::native_window::{Spot, handle_of, opening_origin, show_at};
 use crate::placement::centered;
 use crate::theme;
 
@@ -32,8 +32,14 @@ pub struct UpdateView {
 
 pub fn open(cx: &mut App, actions: UpdateActions, at: (i32, i32)) -> Option<AnyWindowHandle> {
     let logical_size = (theme::UPDATE_WIDTH, theme::UPDATE_HEIGHT);
+    let spot = Spot {
+        at,
+        logical_size,
+        origin: centered,
+        activate: true,
+    };
     let bounds = Bounds::new(
-        point(px(0.), px(0.)),
+        opening_origin(cx, &spot),
         size(px(logical_size.0), px(logical_size.1)),
     );
     let options = WindowOptions {
@@ -45,12 +51,6 @@ pub fn open(cx: &mut App, actions: UpdateActions, at: (i32, i32)) -> Option<AnyW
     };
     let (handle, _) =
         open_window(options, cx, |_, cx| cx.new(|_| UpdateView::new(actions))).ok()?;
-    let spot = Spot {
-        at,
-        logical_size,
-        origin: centered,
-        activate: true,
-    };
     cx.spawn(async move |cx| {
         if let Ok(Some(hwnd)) = handle.update(cx, |_, window, _| handle_of(window)) {
             show_at(hwnd, &spot);

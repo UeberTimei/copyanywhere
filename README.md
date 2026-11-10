@@ -1,10 +1,10 @@
 # CopyAnywhere
 
-A small Windows tray app that copies text the moment you select it. Select text in any program and it lands on the clipboard, with a short toast near the cursor and an optional sound. No Ctrl+C needed.
+A small tray app for Windows, macOS and Linux that copies text the moment you select it. Select text in any program and it lands on the clipboard, with a short toast near the cursor and an optional sound. No Ctrl+C needed.
 
 ## Download
 
-Grab the latest `CopyAnywhere-x64.exe` (64-bit Windows, the usual choice) `CopyAnywhere-x86.exe` (32-bit Windows) or `CopyAnywhere-arm64.exe` (Windows on ARM) from the [Releases page](../../releases/latest) and run it. There is no installer: the app starts straight into the system tray and never opens a window on launch.
+Grab the latest `CopyAnywhere-x64.exe` (64-bit Windows, the usual choice) `CopyAnywhere-x86.exe` (32-bit Windows) or `CopyAnywhere-arm64.exe` (Windows on ARM) from the [Releases page](../../releases/latest) and run it. On macOS take `CopyAnywhere-macos-arm64` (Apple silicon) or `CopyAnywhere-macos-x64`, on Linux `CopyAnywhere-linux-x64`, then `chmod +x` it. There is no installer: the app starts straight into the system tray and never opens a window on launch.
 
 ### Windows warnings
 
@@ -36,7 +36,7 @@ Opened from the tray menu; it closes when it loses focus. Settings are saved to 
 
 ### Limitations
 
-- Windows only.
+- macOS and Linux are new and untested on real machines. macOS asks for Accessibility permission (to send the copy shortcut), and the Linux build needs an X11 session, since Wayland does not allow global pointer and key access. The macOS and Linux builds list every running process (not only windowed ones) in the exclusion picker and show file names instead of program titles.
 - It overwrites the clipboard by design.
 - Terminals treat Ctrl+C as an interrupt when nothing is selected. Add them to the exclusion list.
 

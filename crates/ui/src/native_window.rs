@@ -30,7 +30,7 @@ pub fn show_at(hwnd: HWND, spot: &Spot) {
         SWP_NOACTIVATE
     };
     unsafe {
-        SetWindowLongPtrW(hwnd, GWL_STYLE, WS_POPUP.0 as isize);
+        SetWindowLongPtrW(hwnd, GWL_STYLE, WS_POPUP.0 as _);
         let _ = SetWindowPos(
             hwnd,
             None,

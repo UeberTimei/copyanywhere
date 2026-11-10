@@ -3,8 +3,15 @@ use domain::update::Release;
 use serde_json::Value;
 
 const LATEST: &str = "https://api.github.com/repos/UeberTimei/copyanywhere/releases/latest";
-const EXE_ASSET: &str = "CopyAnywhere.exe";
-const CHECKSUM_ASSET: &str = "CopyAnywhere.exe.sha256";
+// Release assets are named per architecture; keep in sync with the release job in ci.yml.
+#[cfg(target_pointer_width = "64")]
+const EXE_ASSET: &str = "CopyAnywhere-x64.exe";
+#[cfg(not(target_pointer_width = "64"))]
+const EXE_ASSET: &str = "CopyAnywhere-x86.exe";
+#[cfg(target_pointer_width = "64")]
+const CHECKSUM_ASSET: &str = "CopyAnywhere-x64.exe.sha256";
+#[cfg(not(target_pointer_width = "64"))]
+const CHECKSUM_ASSET: &str = "CopyAnywhere-x86.exe.sha256";
 
 pub fn latest() -> Result<Release> {
     let body = crate::http::get_text(LATEST)?;

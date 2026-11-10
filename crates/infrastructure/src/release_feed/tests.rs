@@ -8,8 +8,8 @@ fn parses_version_notes_and_both_assets() {
         "tag_name": "v1.2.0",
         "body": " Fixed things \n",
         "assets": [
-            {"name": "CopyAnywhere.exe", "browser_download_url": "https://x/exe"},
-            {"name": "CopyAnywhere.exe.sha256", "browser_download_url": "https://x/sha"},
+            {"name": "CopyAnywhere-x64.exe", "browser_download_url": "https://x/exe"},
+            {"name": "CopyAnywhere-x64.exe.sha256", "browser_download_url": "https://x/sha"},
         ],
     }))
     .unwrap();
@@ -29,7 +29,7 @@ fn release_without_the_exe_is_rejected() {
 fn release_without_a_checksum_is_still_parsed() {
     let release = parse(&json!({
         "tag_name": "v1.0.0",
-        "assets": [{"name": "CopyAnywhere.exe", "browser_download_url": "https://x/exe"}],
+        "assets": [{"name": "CopyAnywhere-x64.exe", "browser_download_url": "https://x/exe"}],
     }))
     .unwrap();
     assert_eq!(release.checksum_url, None);
@@ -40,7 +40,7 @@ fn non_https_asset_is_rejected() {
     let release = json!({
         "tag_name": "v1.2.0",
         "assets": [
-            {"name": "CopyAnywhere.exe", "browser_download_url": "http://x/exe"},
+            {"name": "CopyAnywhere-x64.exe", "browser_download_url": "http://x/exe"},
         ],
     });
     assert!(parse(&release).is_none());

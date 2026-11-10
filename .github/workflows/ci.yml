@@ -50,7 +50,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp target/release/copyanywhere.exe CopyAnywhere.exe
-          gh release create "${{ steps.version.outputs.tag }}" CopyAnywhere.exe \
+          sha256sum CopyAnywhere.exe > CopyAnywhere.exe.sha256
+          gh release create "${{ steps.version.outputs.tag }}" CopyAnywhere.exe CopyAnywhere.exe.sha256 \
             --target "${{ github.sha }}" \
             --title "CopyAnywhere ${{ steps.version.outputs.tag }}" \
             --generate-notes

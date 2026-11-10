@@ -6,6 +6,10 @@ A small Windows tray app that copies text the moment you select it. Select text 
 
 Grab the latest `CopyAnywhere.exe` from the [Releases page](../../releases/latest) and run it. There is no installer: the app starts straight into the system tray and never opens a window on launch.
 
+### Windows warnings
+
+The exe is not code-signed (certificates cost money), so Windows SmartScreen may show "Windows protected your PC". Click "More info", then "Run anyway". Antivirus tools may also flag it, because a tray app with a global mouse hook looks like a keylogger. It is not one: the hook only sees mouse button presses and positions to detect a selection gesture, and it never records keys or sends data anywhere. The full source is in this repository, so you can read it or [build it yourself](#build-from-source). Each release also ships `CopyAnywhere.exe.sha256`; check your download with `certutil -hashfile CopyAnywhere.exe SHA256`.
+
 ## How it works
 
 - A global mouse hook watches for a selection gesture: releasing the left button after a drag of at least 4 px, or a double or triple click.

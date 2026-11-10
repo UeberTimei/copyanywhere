@@ -85,7 +85,7 @@ Create one branch per feature, use [Conventional Commits](https://www.convention
 
 ## Releases
 
-CI (`.github/workflows/ci.yml`) runs on every push to `main` and on pull requests. After the checks pass on `main`, it builds the release exe and publishes a GitHub release tagged `v<version>` if one does not exist yet. To ship a new version, bump `version` in `crates/app/Cargo.toml` and merge to `main`.
+CI (`.github/workflows/ci.yml`) runs on every push to `main` and on pull requests. After the checks pass on `main`, it builds the release exe and publishes a GitHub release tagged `v<version>` if one does not exist yet. To ship a new version, run `cargo xtask bump <major.minor.patch>` (edits `crates/app/Cargo.toml` and `Cargo.lock`), commit, and merge to `main`. Nothing is released until the version is bumped.
 
 ## License
 

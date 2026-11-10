@@ -4,7 +4,7 @@ A small Windows tray app that copies text the moment you select it. Select text 
 
 ## Download
 
-Grab the latest `CopyAnywhere-x64.exe` (64-bit Windows, the usual choice) or `CopyAnywhere-x86.exe` (32-bit Windows) from the [Releases page](../../releases/latest) and run it. There is no installer: the app starts straight into the system tray and never opens a window on launch.
+Grab the latest `CopyAnywhere-x64.exe` (64-bit Windows, the usual choice) `CopyAnywhere-x86.exe` (32-bit Windows) or `CopyAnywhere-arm64.exe` (Windows on ARM) from the [Releases page](../../releases/latest) and run it. There is no installer: the app starts straight into the system tray and never opens a window on launch.
 
 ### Windows warnings
 

@@ -4,14 +4,12 @@ use serde_json::Value;
 
 const LATEST: &str = "https://api.github.com/repos/UeberTimei/copyanywhere/releases/latest";
 // Release assets are named per architecture; keep in sync with the release job in ci.yml.
-#[cfg(target_pointer_width = "64")]
-const EXE_ASSET: &str = "CopyAnywhere-x64.exe";
-#[cfg(not(target_pointer_width = "64"))]
-const EXE_ASSET: &str = "CopyAnywhere-x86.exe";
-#[cfg(target_pointer_width = "64")]
-const CHECKSUM_ASSET: &str = "CopyAnywhere-x64.exe.sha256";
-#[cfg(not(target_pointer_width = "64"))]
-const CHECKSUM_ASSET: &str = "CopyAnywhere-x86.exe.sha256";
+#[cfg(target_arch = "x86_64")]
+const ARCH: &str = "x64";
+#[cfg(target_arch = "x86")]
+const ARCH: &str = "x86";
+#[cfg(target_arch = "aarch64")]
+const ARCH: &str = "arm64";
 
 pub fn latest() -> Result<Release> {
     let body = crate::http::get_text(LATEST)?;
@@ -19,6 +17,7 @@ pub fn latest() -> Result<Release> {
 }
 
 fn parse(release: &Value) -> Option<Release> {
+    let exe_asset = format!("CopyAnywhere-{ARCH}.exe");
     Some(Release {
         version: release["tag_name"].as_str()?.to_owned(),
         notes: release["body"]
@@ -26,8 +25,8 @@ fn parse(release: &Value) -> Option<Release> {
             .unwrap_or_default()
             .trim()
             .to_owned(),
-        exe_url: asset_url(release, EXE_ASSET)?,
-        checksum_url: asset_url(release, CHECKSUM_ASSET),
+        exe_url: asset_url(release, &exe_asset)?,
+        checksum_url: asset_url(release, &format!("{exe_asset}.sha256")),
     })
 }
 

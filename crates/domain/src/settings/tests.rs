@@ -26,3 +26,10 @@ fn empty_json_deserializes_to_default() {
     let settings: Settings = serde_json::from_str("{}").unwrap();
     assert_eq!(settings, Settings::default());
 }
+
+#[test]
+fn default_checks_for_updates_and_skips_nothing() {
+    let settings = Settings::default();
+    assert!(settings.check_updates);
+    assert!(settings.skipped_version.is_empty());
+}

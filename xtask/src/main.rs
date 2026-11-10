@@ -9,7 +9,7 @@ const CRATES: [&str; 5] = [
     "ui",
     "copyanywhere",
 ];
-const USAGE: &str = "usage: cargo xtask <build|test|check|lint|fmt|run|ci> [crate]\ncrates: domain application infrastructure ui copyanywhere (omit for all)";
+const USAGE: &str = "usage: cargo xtask <build|test|check|lint|fmt|run|update-example|ci> [crate]\ncrates: domain application infrastructure ui copyanywhere (omit for all)";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -26,6 +26,7 @@ fn main() -> ExitCode {
         Some("lint") => lint(package),
         Some("fmt") => cargo::run(&["fmt", "--all"]),
         Some("run") => cargo::run(&["run", "-p", "copyanywhere"]),
+        Some("update-example") => cargo::run(&["run", "-p", "ui", "--example", "update_window"]),
         Some("ci") => ci(),
         _ => {
             eprintln!("{USAGE}");

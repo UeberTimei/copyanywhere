@@ -3,8 +3,10 @@ use std::sync::Arc;
 
 use application::session::Session;
 use domain::settings::Settings;
-use infrastructure::{autostart, file_dialog, foreground, settings_file};
+use domain::update::Release;
+use infrastructure::{autostart, file_dialog, foreground, self_update, settings_file};
 use ui::settings_window::SettingsActions;
+use ui::update_window::UpdateActions;
 
 pub fn settings_actions(session: &Arc<Session>) -> SettingsActions {
     let target = Arc::clone(session);
@@ -14,6 +16,25 @@ pub fn settings_actions(session: &Arc<Session>) -> SettingsActions {
         save: Rc::new(move |next| persist(&target, next)),
         running_programs: Arc::new(foreground::running_programs),
         pick_program: Arc::new(file_dialog::pick_program),
+    }
+}
+
+pub fn update_actions(session: &Arc<Session>, release: Release) -> UpdateActions {
+    let target = Arc::clone(session);
+    let download = release.clone();
+    UpdateActions {
+        release,
+        install: Arc::new(move || self_update::install(&download).map_err(|e| e.to_string())),
+        skip: Rc::new(move |version| {
+            let skipped = version.to_owned();
+            persist(
+                &target,
+                Settings {
+                    skipped_version: skipped,
+                    ..target.settings()
+                },
+            );
+        }),
     }
 }
 

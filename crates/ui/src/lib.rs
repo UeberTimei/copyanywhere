@@ -14,3 +14,6 @@ pub mod toast;
 pub mod tray;
 pub mod tray_icon_image;
 pub mod tray_menu;
+pub mod update_logic;
+pub mod update_render;
+pub mod update_window;

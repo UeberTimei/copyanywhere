@@ -41,6 +41,15 @@ pub fn centered_above(at: (i32, i32), size: (i32, i32), screen: Area) -> (i32, i
     inside(at.0 - size.0 / 2, y, size, screen)
 }
 
+pub fn centered(_: (i32, i32), size: (i32, i32), screen: Area) -> (i32, i32) {
+    inside(
+        (screen.left + screen.right - size.0) / 2,
+        (screen.top + screen.bottom - size.1) / 2,
+        size,
+        screen,
+    )
+}
+
 fn inside(x: i32, y: i32, size: (i32, i32), screen: Area) -> (i32, i32) {
     (
         x.min(screen.right - size.0).max(screen.left),
